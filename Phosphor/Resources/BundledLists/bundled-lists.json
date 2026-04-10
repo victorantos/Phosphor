@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Peter Lowe's Ad Servers",
+    "category": "ads",
+    "filename": "ads.json",
+    "sourceURL": "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext",
+    "description": "A well-maintained list of known ad-serving domains."
+  },
+  {
+    "name": "EasyPrivacy Domains",
+    "category": "trackers",
+    "filename": "trackers.json",
+    "sourceURL": "https://v.firebog.net/hosts/Easyprivacy.txt",
+    "description": "Domains extracted from the EasyPrivacy tracking protection list."
+  },
+  {
+    "name": "URLhaus Malware",
+    "category": "malware",
+    "filename": "malware.json",
+    "sourceURL": "https://urlhaus.abuse.ch/downloads/hostfile/",
+    "description": "Active malware distribution domains from abuse.ch URLhaus."
+  },
+  {
+    "name": "StevenBlack Adult",
+    "category": "adultContent",
+    "filename": "adult-content.json",
+    "sourceURL": "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn-only/hosts",
+    "description": "Adult content domains from the StevenBlack unified hosts project."
+  }
+]

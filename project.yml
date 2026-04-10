@@ -1,0 +1,91 @@
+name: Phosphor
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "26.0"
+  xcodeVersion: "26.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+
+packages:
+  PhosphorShared:
+    path: PhosphorShared
+
+targets:
+  Phosphor:
+    type: application
+    platform: iOS
+    sources:
+      - path: Phosphor
+        excludes:
+          - Resources
+      - path: Phosphor/Resources
+        buildPhase: resources
+    dependencies:
+      - package: PhosphorShared
+      - target: PhosphorFilterExtension
+        embed: true
+        codeSign: true
+    info:
+      path: Phosphor/Info.plist
+      properties:
+        CFBundleDisplayName: Phosphor
+    entitlements:
+      path: Phosphor/Phosphor.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.example.phosphor
+        com.apple.developer.networking.networkextension:
+          - url-filter-provider
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.phosphor
+        INFOPLIST_KEY_CFBundleDisplayName: Phosphor
+        INFOPLIST_KEY_UILaunchScreen_Generation: true
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: false
+
+  PhosphorFilterExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: PhosphorFilterExtension
+    dependencies:
+      - package: PhosphorShared
+    info:
+      path: PhosphorFilterExtension/Info.plist
+      properties:
+        CFBundleDisplayName: Phosphor Filter
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.networkextension.url-filter
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).FilterControlProvider
+    entitlements:
+      path: PhosphorFilterExtension/PhosphorFilterExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.example.phosphor
+        com.apple.developer.networking.networkextension:
+          - url-filter-provider
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.phosphor.filter-extension
+        INFOPLIST_KEY_CFBundleDisplayName: Phosphor Filter
+
+schemes:
+  Phosphor:
+    build:
+      targets:
+        Phosphor: all
+        PhosphorFilterExtension: all
+    run:
+      config: Debug
+    profile:
+      config: Release
+    archive:
+      config: Release

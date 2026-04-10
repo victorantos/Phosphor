@@ -1,0 +1,30 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Swift
+*.swift text diff=swift
+
+# Xcode
+*.pbxproj merge=union
+*.xcscheme text
+
+# JSON - bundled filter lists can be large
+*.json text
+
+# Shell scripts
+*.sh text eol=lf
+
+# Markdown
+*.md text
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+
+# Plists
+*.plist text
+*.entitlements text
+*.xcstrings text
