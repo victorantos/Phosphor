@@ -1,5 +1,117 @@
 {
   "sourceLanguage" : "en",
-  "strings" : {},
+  "strings" : {
+    "·" : {
+
+    },
+    "%@" : {
+
+    },
+    "%@ active list%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ active list%2$@"
+          }
+        }
+      }
+    },
+    "%@ of %@ rules" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ of %2$@ rules"
+          }
+        }
+      }
+    },
+    "%@ rules" : {
+
+    },
+    "%@ rules loaded" : {
+
+    },
+    "14-Day Trend" : {
+
+    },
+    "Add filter lists to start blocking ads, trackers, and malware." : {
+
+    },
+    "Allow" : {
+
+    },
+    "Block" : {
+
+    },
+    "Blocked Today" : {
+
+    },
+    "By Category" : {
+
+    },
+    "Categories" : {
+
+    },
+    "Enable Filtering" : {
+
+    },
+    "Filtering Paused" : {
+
+    },
+    "Get Started" : {
+
+    },
+    "License" : {
+
+    },
+    "MIT License — free to use, modify, and distribute." : {
+
+    },
+    "Next" : {
+
+    },
+    "No data yet" : {
+
+    },
+    "Phosphor" : {
+
+    },
+    "Privacy-preserving URL filtering for iOS" : {
+
+    },
+    "Refresh the list to download rules." : {
+
+    },
+    "Rules" : {
+
+    },
+    "Skip for Now" : {
+
+    },
+    "The URL should point to a hosts-format or plain domain list (one domain per line)." : {
+
+    },
+    "threats stopped" : {
+
+    },
+    "Toggle entire categories on or off. Individual lists can be managed in the Lists tab." : {
+
+    },
+    "URLs will not be filtered during the pause period." : {
+
+    },
+    "Version %@ (%@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Version %1$@ (%2$@)"
+          }
+        }
+      }
+    }
+  },
   "version" : "1.0"
 }

@@ -10,7 +10,7 @@ import PhosphorShared
 @Observable
 final class FilterManagerService {
     private static let logger = Logger(
-        subsystem: "com.example.phosphor",
+        subsystem: "com.nestclaw.phosphor",
         category: "FilterManager"
     )
 
@@ -51,7 +51,7 @@ final class FilterManagerService {
             let manager = NEURLFilterManager.shared
             try await manager.loadFromPreferences()
             isEnabled = manager.isEnabled
-            updateStatus(from: manager.status)
+            updateStatus(from: await manager.status)
             Self.logger.info("Configuration loaded, enabled: \(self.isEnabled), status: \(self.status.rawValue)")
         } catch {
             Self.logger.error("Failed to load configuration: \(error.localizedDescription)")
@@ -96,7 +96,7 @@ final class FilterManagerService {
         try await manager.saveToPreferences()
 
         isEnabled = true
-        updateStatus(from: manager.status)
+        updateStatus(from: await manager.status)
         lastError = nil
 
         Self.logger.info("Filter enabled and saved to preferences")
@@ -113,7 +113,7 @@ final class FilterManagerService {
         try await manager.saveToPreferences()
 
         isEnabled = false
-        updateStatus(from: manager.status)
+        updateStatus(from: await manager.status)
         Self.logger.info("Filter disabled")
     }
 
@@ -129,13 +129,13 @@ final class FilterManagerService {
     }
 
     /// Start observing status changes.
+    @MainActor
     func observeStatusChanges() {
-        Task {
+        Task { @MainActor [weak self] in
+            guard let self else { return }
             let manager = NEURLFilterManager.shared
             for await newStatus in manager.handleStatusChange() {
-                await MainActor.run {
-                    updateStatus(from: newStatus)
-                }
+                self.updateStatus(from: newStatus)
             }
         }
     }

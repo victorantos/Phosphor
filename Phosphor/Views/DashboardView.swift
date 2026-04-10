@@ -6,25 +6,21 @@ struct DashboardView: View {
     @State private var viewModel = DashboardViewModel()
     @State private var hasAppeared = false
 
+    /// True only when the system filter is actually running.
+    private var isFilterRunning: Bool {
+        viewModel.filterIsEnabled && viewModel.filterStatus == "Running"
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
-                    if viewModel.totalBlocks == 0 {
-                        emptyHero
-                    } else {
-                        heroCard
-                        periodCards
-                        categoryChart
-                        trendChart
-                    }
-
-                    statusCard
+                if viewModel.totalBlocks == 0 {
+                    emptyState
+                } else {
+                    statsContent
                 }
-                .padding()
-                .opacity(hasAppeared ? 1 : 0)
-                .offset(y: hasAppeared ? 0 : 12)
             }
+            .contentMargins(.bottom, 80, for: .scrollContent)
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Dashboard")
             .refreshable { viewModel.load() }
@@ -37,54 +33,114 @@ struct DashboardView: View {
         }
     }
 
+    // MARK: - Empty State
+
+    private var emptyState: some View {
+        VStack(spacing: 20) {
+            Spacer(minLength: 20)
+
+            Image(systemName: isFilterRunning ? "shield.checkered" : "shield.slash")
+                .font(.system(size: 64))
+                .foregroundStyle(isFilterRunning ? PhosphorTheme.accent : .secondary)
+                .accessibilityHidden(true)
+
+            VStack(spacing: 8) {
+                Text(isFilterRunning ? "Filtering Active" : "Filtering Not Active")
+                    .font(.title2)
+                    .fontWeight(.bold)
+
+                Text(isFilterRunning
+                    ? "Block stats will appear here as URLs are filtered."
+                    : "URL filtering is not running. Enable it to block ads, trackers, and malware across all apps.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, 24)
+
+            // Filter status badge
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(statusColor)
+                    .frame(width: 10, height: 10)
+                Text(viewModel.filterStatus)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            .background(.regularMaterial, in: Capsule())
+
+            if !isFilterRunning {
+                Button {
+                    UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+                } label: {
+                    Label("Set Up Filtering", systemImage: "slider.horizontal.3")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(PhosphorTheme.accent)
+                .controlSize(.large)
+                .padding(.horizontal, 32)
+            }
+
+            statusCard
+                .padding(.horizontal)
+
+            Spacer(minLength: 20)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var statusColor: Color {
+        switch viewModel.filterStatus {
+        case "Running": .green
+        case "Starting": .yellow
+        case "Stopped": .orange
+        default: .red
+        }
+    }
+
+    // MARK: - Stats Content
+
+    private var statsContent: some View {
+        VStack(spacing: 16) {
+            heroCard
+            periodCards
+            categoryChart
+            trendChart
+            statusCard
+        }
+        .padding()
+        .opacity(hasAppeared ? 1 : 0)
+        .offset(y: hasAppeared ? 0 : 12)
+    }
+
     // MARK: - Hero Card
 
     private var heroCard: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 8) {
             Text("Blocked Today")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
             Text(viewModel.todayBlocks.formatted())
-                .font(.system(size: 56, weight: .bold, design: .rounded))
+                .font(.system(size: 64, weight: .bold, design: .rounded))
                 .foregroundStyle(PhosphorTheme.accent)
                 .contentTransition(.numericText())
                 .animation(PhosphorTheme.dataAnimation, value: viewModel.todayBlocks)
 
             Text("threats stopped")
-                .font(.caption)
+                .font(.subheadline)
                 .foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 24)
+        .padding(.vertical, 28)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: PhosphorTheme.cardRadius))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(viewModel.todayBlocks) threats blocked today")
-    }
-
-    private var emptyHero: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "shield.checkered")
-                .font(.system(size: 48))
-                .foregroundStyle(PhosphorTheme.accent)
-                .symbolEffect(.pulse, options: .repeating.speed(0.5))
-                .accessibilityHidden(true)
-
-            Text("Phosphor is Active")
-                .font(.title3)
-                .fontWeight(.semibold)
-
-            Text("Block stats will appear here as URLs are filtered. The on-device Bloom filter handles most lookups instantly.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(24)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: PhosphorTheme.cardRadius))
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Phosphor is active. Block stats will appear as URLs are filtered.")
     }
 
     // MARK: - Period Cards
@@ -107,11 +163,11 @@ struct DashboardView: View {
 
             if viewModel.categoryBreakdown.isEmpty {
                 Text("No data yet")
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, minHeight: 120)
+                    .frame(maxWidth: .infinity, minHeight: 100)
             } else {
-                HStack(spacing: 20) {
+                HStack(spacing: 24) {
                     Chart(viewModel.categoryBreakdown) { point in
                         SectorMark(
                             angle: .value("Count", point.count),
@@ -122,10 +178,10 @@ struct DashboardView: View {
                         .cornerRadius(4)
                         .accessibilityLabel("\(point.category.displayName): \(point.count) blocks")
                     }
-                    .frame(width: 120, height: 120)
+                    .frame(height: 140)
                     .chartLegend(.hidden)
 
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 10) {
                         ForEach(viewModel.categoryBreakdown) { point in
                             HStack(spacing: 8) {
                                 Circle()
@@ -133,10 +189,10 @@ struct DashboardView: View {
                                     .frame(width: 10, height: 10)
                                     .accessibilityHidden(true)
                                 Text(point.category.displayName)
-                                    .font(.caption)
+                                    .font(.subheadline)
                                 Spacer()
                                 Text(point.count.formatted())
-                                    .font(.caption)
+                                    .font(.subheadline)
                                     .fontWeight(.medium)
                                     .foregroundStyle(.secondary)
                             }
@@ -164,9 +220,9 @@ struct DashboardView: View {
             let trend = viewModel.dailyTrend(days: 14)
             if trend.allSatisfy({ $0.count == 0 }) {
                 Text("No data yet")
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, minHeight: 120)
+                    .frame(maxWidth: .infinity, minHeight: 100)
             } else {
                 Chart(trend) { point in
                     AreaMark(
@@ -191,7 +247,7 @@ struct DashboardView: View {
                     .lineStyle(StrokeStyle(lineWidth: 2))
                     .accessibilityLabel("\(point.date.formatted(.dateTime.month().day())): \(point.count) blocks")
                 }
-                .frame(height: 160)
+                .frame(height: 180)
                 .chartXAxis {
                     AxisMarks(values: .stride(by: .day, count: 3)) { _ in
                         AxisGridLine()
@@ -214,18 +270,18 @@ struct DashboardView: View {
     // MARK: - Status Card
 
     private var statusCard: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 14) {
             Image(systemName: "list.bullet.rectangle.fill")
                 .foregroundStyle(PhosphorTheme.accent)
-                .font(.title3)
+                .font(.title2)
                 .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text("\(viewModel.enabledListCount) active list\(viewModel.enabledListCount == 1 ? "" : "s")")
-                    .font(.subheadline)
+                    .font(.body)
                     .fontWeight(.medium)
                 Text("\(viewModel.totalRuleCount.formatted()) rules loaded")
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
 
@@ -257,23 +313,23 @@ private struct PeriodCard: View {
     let icon: String
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 8) {
             Image(systemName: icon)
-                .font(.caption)
+                .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .accessibilityHidden(true)
             Text(count.formatted())
-                .font(.title3)
+                .font(.title2)
                 .fontWeight(.bold)
                 .foregroundStyle(PhosphorTheme.accent)
                 .contentTransition(.numericText())
                 .animation(PhosphorTheme.dataAnimation, value: count)
             Text(title)
-                .font(.caption2)
+                .font(.caption)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
+        .padding(.vertical, 16)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(count) blocks \(title.lowercased())")

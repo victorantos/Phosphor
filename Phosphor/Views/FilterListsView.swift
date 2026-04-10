@@ -92,6 +92,7 @@ struct FilterListsView: View {
                 }
             }
         }
+        .listStyle(.insetGrouped)
         .animation(PhosphorTheme.dataAnimation, value: viewModel.lists.map(\.id))
     }
 
@@ -117,28 +118,33 @@ private struct FilterListRow: View {
     let viewModel: FilterListViewModel
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(list.name)
                     .font(.body)
                     .fontWeight(.medium)
+                    .lineLimit(1)
 
-                HStack(spacing: 8) {
+                HStack(spacing: 6) {
+                    sourceLabel
+
                     Text("\(list.ruleCount.formatted()) rules")
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
                     if let date = list.lastUpdated {
+                        Text("·")
+                            .font(.caption)
+                            .foregroundStyle(.quaternary)
                         Text(date, style: .relative)
                             .font(.caption)
                             .foregroundStyle(.tertiary)
+                            .lineLimit(1)
                     }
-
-                    sourceLabel
                 }
             }
 
-            Spacer()
+            Spacer(minLength: 8)
 
             Toggle("", isOn: Binding(
                 get: { list.isEnabled },
@@ -150,8 +156,8 @@ private struct FilterListRow: View {
             ))
             .labelsHidden()
             .tint(PhosphorTheme.accent)
+            .fixedSize()
         }
-        .padding(.vertical, 2)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(list.name), \(list.ruleCount) rules")
         .accessibilityValue(list.isEnabled ? "Enabled" : "Disabled")
@@ -160,26 +166,19 @@ private struct FilterListRow: View {
 
     @ViewBuilder
     private var sourceLabel: some View {
-        switch list.source {
-        case .bundled:
-            Text("Bundled")
-                .font(.caption2)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(PhosphorTheme.accentMuted, in: Capsule())
-        case .remote:
-            Text("Remote")
-                .font(.caption2)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(Color.blue.opacity(0.15), in: Capsule())
-        case .manual:
-            Text("Custom")
-                .font(.caption2)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(Color.orange.opacity(0.15), in: Capsule())
+        let (text, color): (String, Color) = switch list.source {
+        case .bundled: ("Bundled", PhosphorTheme.accent)
+        case .remote: ("Remote", .blue)
+        case .manual: ("Custom", .orange)
         }
+        Text(text)
+            .font(.caption2)
+            .fontWeight(.medium)
+            .lineLimit(1)
+            .fixedSize()
+            .padding(.horizontal, 7)
+            .padding(.vertical, 3)
+            .background(color.opacity(0.15), in: Capsule())
     }
 }
 

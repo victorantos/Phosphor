@@ -5,8 +5,8 @@ import Testing
 // MARK: - Constants
 
 @Test func sharedConstantsExist() {
-    #expect(PhosphorConstants.appGroupID == "group.com.example.phosphor")
-    #expect(PhosphorConstants.filterExtensionBundleID == "com.example.phosphor.filter-extension")
+    #expect(PhosphorConstants.appGroupID == "group.com.nestclaw.phosphor")
+    #expect(PhosphorConstants.filterExtensionBundleID == "com.nestclaw.phosphor.filter-extension")
 }
 
 // MARK: - FilterCategory

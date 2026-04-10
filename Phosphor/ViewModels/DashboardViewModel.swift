@@ -1,4 +1,5 @@
 import Foundation
+import NetworkExtension
 import Observation
 import os
 import PhosphorShared
@@ -6,12 +7,14 @@ import PhosphorShared
 @Observable
 @MainActor
 final class DashboardViewModel {
-    private static let logger = Logger(subsystem: "com.example.phosphor", category: "DashboardVM")
+    private static let logger = Logger(subsystem: "com.nestclaw.phosphor", category: "DashboardVM")
     private let store: FilterListStore
 
     var stats = BlockStats()
     var enabledListCount = 0
     var totalRuleCount = 0
+    var filterIsEnabled = false
+    var filterStatus: String = "Unknown"
 
     init(store: FilterListStore = FilterListStore()) {
         self.store = store
@@ -28,6 +31,27 @@ final class DashboardViewModel {
             totalRuleCount = enabled.reduce(0) { $0 + $1.ruleCount }
         } catch {
             Self.logger.error("Failed to load dashboard data: \(error.localizedDescription)")
+        }
+        Task { await loadFilterStatus() }
+    }
+
+    func loadFilterStatus() async {
+        do {
+            let manager = NEURLFilterManager.shared
+            try await manager.loadFromPreferences()
+            filterIsEnabled = manager.isEnabled
+            let status = await manager.status
+            switch status {
+            case .running: filterStatus = "Running"
+            case .starting: filterStatus = "Starting"
+            case .stopped: filterStatus = "Stopped"
+            case .stopping: filterStatus = "Stopping"
+            case .invalid: filterStatus = "Not Configured"
+            @unknown default: filterStatus = "Unknown"
+            }
+        } catch {
+            filterIsEnabled = false
+            filterStatus = "Not Configured"
         }
     }
 

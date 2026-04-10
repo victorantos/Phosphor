@@ -14,7 +14,7 @@ public final class FilterListStore: Sendable {
     private let containerURL: URL
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
-    private let logger = Logger(subsystem: "com.example.phosphor", category: "FilterListStore")
+    private let logger = Logger(subsystem: "com.nestclaw.phosphor", category: "FilterListStore")
 
     /// Name of the metadata file containing all FilterList records.
     private static let metadataFilename = "filter-lists.json"
@@ -25,7 +25,7 @@ public final class FilterListStore: Sendable {
 
     /// Notification name posted via Darwin notifications when lists change.
     /// The extension observes this to reload its dataset.
-    public static let listsDidChangeNotification = "com.example.phosphor.listsDidChange"
+    public static let listsDidChangeNotification = "com.nestclaw.phosphor.listsDidChange"
 
     public init(containerURL: URL? = nil) {
         let url = containerURL ?? PhosphorConstants.sharedContainerURL ?? URL.temporaryDirectory

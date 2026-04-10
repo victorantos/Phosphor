@@ -50,3 +50,7 @@ Authkey_*.p8
 # Claude Code
 .claude/
 project.md
+PIRServer/pir-service-example/
+PIRServer/certs/
+PIRServer/data/processed/
+PIRServer/data/url-database.txtpb

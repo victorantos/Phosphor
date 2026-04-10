@@ -18,7 +18,7 @@ public final class BundledListLoader: Sendable {
 
     private static let versionKey = "bundledListVersion"
     private let store: FilterListStore
-    private let logger = Logger(subsystem: "com.example.phosphor", category: "BundledListLoader")
+    private let logger = Logger(subsystem: "com.nestclaw.phosphor", category: "BundledListLoader")
 
     public init(store: FilterListStore) {
         self.store = store

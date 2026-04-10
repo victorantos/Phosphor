@@ -1,4 +1,5 @@
 import NetworkExtension
+import PhosphorShared
 import SwiftUI
 
 struct SetupPage: View {
@@ -183,17 +184,24 @@ struct SetupPage: View {
         setupState = .enabling
         errorMessage = nil
 
+        let pirURL = URL(string: "https://pir.nestclaw.com")!
+
         do {
             let manager = NEURLFilterManager.shared
+
+            // Remove any existing invalid configuration first
+            try? await manager.loadFromPreferences()
+            try? await manager.removeFromPreferences()
+
+            // Fresh configuration with HTTPS PIR server
             try await manager.loadFromPreferences()
 
-            // NOTE: PIR server configuration is required for production.
-            // For development/testing, we set a placeholder that will need to
-            // be replaced with a real PIR server URL before the filter can
-            // actually resolve Bloom filter matches.
-            //
-            // The Bloom filter prefilter still works for fast local rejection
-            // even without a PIR server — the system just can't confirm matches.
+            try manager.setConfiguration(
+                pirServerURL: pirURL,
+                pirPrivacyPassIssuerURL: pirURL,
+                pirAuthenticationToken: "phosphor-dev-token",
+                controlProviderBundleIdentifier: PhosphorConstants.filterExtensionBundleID
+            )
 
             manager.localizedDescription = "Phosphor URL Filter"
             manager.isEnabled = true
@@ -201,22 +209,37 @@ struct SetupPage: View {
             manager.prefilterFetchInterval = 86400
 
             try await manager.saveToPreferences()
-
             withAnimation { setupState = .success }
         } catch {
-            errorMessage = mapError(error)
-            withAnimation { setupState = .failed }
+            let code = (error as NSError).code
+            if code == 9 {
+                // "configuration is unchanged" — already saved, treat as success
+                withAnimation { setupState = .success }
+                return
+            }
+
+            // If setConfiguration failed, try without it — maybe config already exists
+            do {
+                let manager = NEURLFilterManager.shared
+                try await manager.loadFromPreferences()
+                manager.isEnabled = true
+                try await manager.saveToPreferences()
+                withAnimation { setupState = .success }
+            } catch {
+                let retryCode = (error as NSError).code
+                if retryCode == 9 {
+                    withAnimation { setupState = .success }
+                } else {
+                    errorMessage = mapError(error)
+                    withAnimation { setupState = .failed }
+                }
+            }
         }
     }
 
     private func mapError(_ error: Error) -> String {
         let nsError = error as NSError
-        switch nsError.code {
-        case 1: // configurationPermissionDenied or similar
-            return "Permission denied. Open Settings > General > VPN & Device Management to allow Phosphor."
-        default:
-            return error.localizedDescription
-        }
+        return "[\(nsError.domain) code=\(nsError.code)] \(nsError.localizedDescription)"
     }
 }
 

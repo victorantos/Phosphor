@@ -1,0 +1,23 @@
+{
+    "rlweParameters": "n_4096_logq_27_28_28_logt_5",
+    "inputDatabase": "PIRServer/data/url-database.txtpb",
+    "outputDatabase": "PIRServer/data/processed/shard_SHARD_ID.bin",
+    "outputPirParameters": "PIRServer/data/processed/shard_SHARD_ID.params.txtpb",
+    "outputEvaluationKeyConfig": "PIRServer/data/processed/evaluation-key-config.txtpb",
+    "algorithm": "mulPir",
+    "sharding": {
+        "shardCount": 4
+    },
+    "trialsPerShard": 1,
+    "cuckooTableArguments": {
+        "hashFunctionCount": 2,
+        "maxEvictionCount": 100,
+        "maxSerializedBucketSize": 1024,
+        "bucketCount": {
+            "allowExpansion": {
+                "targetLoadFactor": 0.9,
+                "expansionFactor": 1.1
+            }
+        }
+    }
+}

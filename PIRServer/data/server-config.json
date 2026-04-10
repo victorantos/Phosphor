@@ -1,0 +1,16 @@
+{
+    "issuerRequestUri": "https://pir.nestclaw.com",
+    "users": [
+        {
+            "tier": "tier1",
+            "tokens": ["phosphor-dev-token"]
+        }
+    ],
+    "usecases": [
+        {
+            "name": "com.nestclaw.phosphor.url.filtering",
+            "fileStem": "/Users/victora/Projects/fun/Phosphor/PIRServer/data/processed/shard",
+            "shardCount": 4
+        }
+    ]
+}

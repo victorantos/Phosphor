@@ -1,3 +1,4 @@
+import Foundation
 import Observation
 import os
 import PhosphorShared
@@ -5,7 +6,7 @@ import PhosphorShared
 @Observable
 @MainActor
 final class FilterListViewModel {
-    private static let logger = Logger(subsystem: "com.example.phosphor", category: "FilterListVM")
+    private static let logger = Logger(subsystem: "com.nestclaw.phosphor", category: "FilterListVM")
 
     private let store: FilterListStore
 

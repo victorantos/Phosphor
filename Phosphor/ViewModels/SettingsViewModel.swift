@@ -6,7 +6,7 @@ import PhosphorShared
 @Observable
 @MainActor
 final class SettingsViewModel {
-    private static let logger = Logger(subsystem: "com.example.phosphor", category: "SettingsVM")
+    private static let logger = Logger(subsystem: "com.nestclaw.phosphor", category: "SettingsVM")
     private let store: FilterListStore
 
     var lists: [FilterList] = []
