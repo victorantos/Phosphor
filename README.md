@@ -131,4 +131,6 @@ See [SECURITY.md](SECURITY.md) for the threat model and vulnerability disclosure
 
 ## License
 
-[MIT](LICENSE) — free to use, modify, and distribute.
+The source code is licensed under the [MIT License](LICENSE) — free to use, modify, and distribute.
+
+> **Note:** The Phosphor name, logo, and branding are proprietary and may not be used without permission. You are free to fork and modify the code, but please use your own name and branding for derivative works.
