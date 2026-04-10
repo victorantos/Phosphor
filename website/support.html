@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support — Phosphor</title>
+    <style>
+        :root { --accent: #39FF7A; --bg: #0a0a0a; --card: #1a1a1a; --text: #f0f0f0; --muted: #888; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+        .container { max-width: 680px; margin: 0 auto; padding: 48px 24px; }
+        h1 { font-size: 2em; margin-bottom: 24px; }
+        h2 { font-size: 1.3em; margin: 32px 0 12px; color: var(--accent); }
+        p, li { color: var(--muted); margin-bottom: 12px; }
+        a { color: var(--accent); }
+        .card { background: var(--card); border-radius: 16px; padding: 24px; margin-bottom: 16px; }
+        .card h3 { margin-bottom: 8px; }
+        footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #222; text-align: center; color: var(--muted); font-size: 0.85em; }
+        footer a { margin: 0 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Support</h1>
+
+        <div class="card">
+            <h3>Email Support</h3>
+            <p>For questions, issues, or feedback: <a href="mailto:support@phosphor.online">support@phosphor.online</a></p>
+        </div>
+
+        <div class="card">
+            <h3>GitHub Issues</h3>
+            <p>Report bugs or request features: <a href="https://github.com/victorantos/Phosphor/issues">github.com/victorantos/Phosphor/issues</a></p>
+        </div>
+
+        <h2>FAQ</h2>
+
+        <div class="card">
+            <h3>How does Phosphor protect my privacy?</h3>
+            <p>Phosphor uses Apple's Private Information Retrieval (PIR) with homomorphic encryption. URLs are checked locally on your device. For potential matches, encrypted queries go through Apple's relay. Neither the app, our server, nor Apple can see which URLs you visit.</p>
+        </div>
+
+        <div class="card">
+            <h3>Why does the filter show as "Invalid" or "Not Active"?</h3>
+            <p>The URL filter requires Apple's OHTTP relay approval and a stable internet connection to our PIR server. If the filter shows as invalid, try: (1) Delete and reinstall the app, (2) Restart your device, (3) Check that you have an active subscription.</p>
+        </div>
+
+        <div class="card">
+            <h3>How do I cancel my subscription?</h3>
+            <p>Go to Settings > [Your Name] > Subscriptions > Phosphor > Cancel Subscription. You'll continue to have access until the end of your billing period.</p>
+        </div>
+
+        <div class="card">
+            <h3>Does Phosphor work with all apps?</h3>
+            <p>Phosphor filters URLs across Safari, in-app browsers (WebKit), and apps using URLSession. Some apps using custom networking stacks may not be filtered.</p>
+        </div>
+
+        <footer>
+            <a href="/">Home</a>
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms of Service</a>
+            <p style="margin-top: 12px;">&copy; 2026 Phosphor</p>
+        </footer>
+    </div>
+</body>
+</html>

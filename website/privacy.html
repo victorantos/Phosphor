@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — Phosphor</title>
+    <style>
+        :root { --accent: #39FF7A; --bg: #0a0a0a; --card: #1a1a1a; --text: #f0f0f0; --muted: #888; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+        .container { max-width: 680px; margin: 0 auto; padding: 48px 24px; }
+        h1 { font-size: 2em; margin-bottom: 8px; }
+        h2 { font-size: 1.3em; margin: 32px 0 12px; color: var(--accent); }
+        p, li { color: var(--muted); margin-bottom: 12px; }
+        ul { padding-left: 20px; }
+        .updated { color: var(--muted); font-size: 0.9em; margin-bottom: 32px; }
+        a { color: var(--accent); }
+        footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #222; text-align: center; color: var(--muted); font-size: 0.85em; }
+        footer a { margin: 0 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Privacy Policy</h1>
+        <p class="updated">Last updated: April 10, 2026</p>
+
+        <p>Phosphor ("we," "our," or "the app") is a URL filtering application for iOS that uses Apple's NEURLFilterManager API with Private Information Retrieval (PIR). This privacy policy explains how we handle your data.</p>
+
+        <h2>The Core Promise</h2>
+        <p><strong>Phosphor never sees, collects, stores, or transmits any URLs you visit.</strong> This isn't just a policy — it's cryptographically enforced by the architecture:</p>
+        <ul>
+            <li>URLs are checked locally on your device using a Bloom filter</li>
+            <li>For potential matches, the system sends <strong>homomorphically encrypted</strong> queries to our PIR server — we process the query without ever decrypting it</li>
+            <li>Queries are routed through <strong>Apple's Oblivious HTTP (OHTTP) relay</strong>, which strips your IP address before reaching our server</li>
+            <li>Our server never sees your IP address or the URLs being queried</li>
+        </ul>
+
+        <h2>Data We Do NOT Collect</h2>
+        <ul>
+            <li>URLs or domains you visit</li>
+            <li>Browsing history or activity</li>
+            <li>IP addresses</li>
+            <li>Device identifiers or fingerprints</li>
+            <li>Analytics or usage telemetry</li>
+            <li>Crash reports</li>
+            <li>Location data</li>
+        </ul>
+
+        <h2>Data Stored Locally on Your Device</h2>
+        <p>The following data is stored only on your device in the app's sandboxed container and shared App Group:</p>
+        <ul>
+            <li><strong>Filter list metadata</strong> — names, categories, and enabled status of your filter lists</li>
+            <li><strong>Filter rules</strong> — the domain lists you've enabled (downloaded from public sources)</li>
+            <li><strong>Aggregate block statistics</strong> — counts of blocks by category and day (no individual URLs)</li>
+            <li><strong>App preferences</strong> — settings like update frequency and pause state</li>
+        </ul>
+        <p>This data never leaves your device. It is not backed up to iCloud and is deleted when you uninstall the app.</p>
+
+        <h2>PIR Server</h2>
+        <p>Our PIR server hosts an encrypted database of URLs to filter. When the system queries this database:</p>
+        <ul>
+            <li>The query is <strong>homomorphically encrypted</strong> — our server performs computation on the ciphertext without decrypting it</li>
+            <li>The server returns an <strong>encrypted response</strong> that only your device can decrypt</li>
+            <li>We cannot determine which URL was queried or what the result was</li>
+            <li>Server logs contain only anonymous request timestamps and sizes — no identifying information</li>
+        </ul>
+
+        <h2>Subscription Data</h2>
+        <p>Subscriptions are processed entirely by Apple through the App Store. We do not collect or store payment information. Apple's privacy policy governs subscription data handling.</p>
+
+        <h2>Third-Party Services</h2>
+        <p>Phosphor uses <strong>no third-party SDKs, analytics services, crash reporters, or advertising networks</strong>. The only external services involved are:</p>
+        <ul>
+            <li><strong>Apple's OHTTP Relay</strong> — operated by Apple, provides network-level anonymity for PIR queries</li>
+            <li><strong>Apple's App Store</strong> — handles subscription billing</li>
+            <li><strong>Public filter list sources</strong> — domain lists are fetched from well-known open-source projects (EasyList, StevenBlack, etc.)</li>
+        </ul>
+
+        <h2>Children's Privacy</h2>
+        <p>Phosphor does not knowingly collect any data from children under 13. Since we collect no personal data from any user, there is no data to protect.</p>
+
+        <h2>Changes to This Policy</h2>
+        <p>We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the "Last updated" date.</p>
+
+        <h2>Contact</h2>
+        <p>If you have questions about this privacy policy, contact us at <a href="mailto:privacy@phosphor.online">privacy@phosphor.online</a>.</p>
+
+        <footer>
+            <a href="/">Home</a>
+            <a href="/terms">Terms of Service</a>
+            <p style="margin-top: 12px;">&copy; 2026 Phosphor</p>
+        </footer>
+    </div>
+</body>
+</html>

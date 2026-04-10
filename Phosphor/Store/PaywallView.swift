@@ -127,9 +127,9 @@ struct PaywallView: View {
                 .multilineTextAlignment(.center)
 
             HStack(spacing: 16) {
-                Link("Privacy Policy", destination: URL(string: "https://nestclaw.com/phosphor/privacy")!)
+                Link("Privacy Policy", destination: URL(string: "https://phosphor.online/privacy")!)
                     .font(.caption)
-                Link("Terms of Service", destination: URL(string: "https://nestclaw.com/phosphor/terms")!)
+                Link("Terms of Service", destination: URL(string: "https://phosphor.online/terms")!)
                     .font(.caption)
             }
         }

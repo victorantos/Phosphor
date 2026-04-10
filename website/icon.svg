@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#39FF7A"/>
+      <stop offset="100%" stop-color="#20C05A"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="20" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+  <!-- Glow circle -->
+  <circle cx="512" cy="480" r="260" fill="#39FF7A" opacity="0.08"/>
+  <!-- Shield body -->
+  <path d="M512 200 C512 200 320 260 320 260 C320 260 320 520 320 520 C320 680 512 800 512 800 C512 800 704 680 704 680 C704 520 704 260 704 260 C704 260 512 200 512 200Z" fill="url(#shield)" filter="url(#glow)" opacity="0.95"/>
+  <!-- Shield highlight (left half lighter) -->
+  <path d="M512 200 C512 200 320 260 320 260 C320 260 320 520 320 520 C320 680 512 800 512 800 L512 200Z" fill="white" opacity="0.15"/>
+  <!-- Checkmark -->
+  <path d="M420 490 L485 560 L610 420" stroke="white" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

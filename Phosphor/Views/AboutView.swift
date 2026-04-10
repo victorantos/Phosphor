@@ -107,9 +107,18 @@ struct AboutView: View {
             Link(destination: URL(string: "https://developer.apple.com/videos/play/wwdc2025/234/")!) {
                 Label("WWDC25 Session 234", systemImage: "play.rectangle")
             }
-            // TODO: Replace with actual GitHub URL
-            Label("GitHub Repository", systemImage: "chevron.left.forwardslash.chevron.right")
-                .foregroundStyle(.secondary)
+            Link(destination: URL(string: "https://phosphor.online")!) {
+                Label("Website", systemImage: "globe")
+            }
+            Link(destination: URL(string: "https://github.com/victorantos/Phosphor")!) {
+                Label("GitHub Repository", systemImage: "chevron.left.forwardslash.chevron.right")
+            }
+            Link(destination: URL(string: "https://phosphor.online/privacy")!) {
+                Label("Privacy Policy", systemImage: "hand.raised")
+            }
+            Link(destination: URL(string: "https://phosphor.online/terms")!) {
+                Label("Terms of Service", systemImage: "doc.text")
+            }
         }
     }
 

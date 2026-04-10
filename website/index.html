@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phosphor — Privacy-Preserving URL Filter for iOS</title>
+    <meta name="description" content="System-wide ad, tracker, and malware blocking for iOS 26. Powered by Apple's Private Information Retrieval — we never see the URLs you visit.">
+    <style>
+        :root {
+            --accent: #39FF7A;
+            --bg: #0a0a0a;
+            --card: #1a1a1a;
+            --text: #f0f0f0;
+            --muted: #888;
+            --radius: 16px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+        header {
+            text-align: center;
+            padding: 80px 0 40px;
+        }
+        header .icon {
+            font-size: 72px;
+            margin-bottom: 16px;
+        }
+        h1 {
+            font-size: 2.5em;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        h1 span { color: var(--accent); }
+        .tagline {
+            font-size: 1.2em;
+            color: var(--muted);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(57, 255, 122, 0.15);
+            color: var(--accent);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 48px 0;
+        }
+        @media (max-width: 500px) { .features { grid-template-columns: 1fr; } }
+        .feature {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px;
+        }
+        .feature h3 { font-size: 1em; margin-bottom: 6px; }
+        .feature p { color: var(--muted); font-size: 0.9em; }
+        .privacy-section {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin: 48px 0;
+            border-left: 4px solid var(--accent);
+        }
+        .privacy-section h2 { margin-bottom: 16px; }
+        .privacy-section p { color: var(--muted); margin-bottom: 12px; }
+        .steps {
+            counter-reset: step;
+            margin: 48px 0;
+        }
+        .step {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .step-num {
+            counter-increment: step;
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            color: var(--bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85em;
+            flex-shrink: 0;
+        }
+        .step-num::before { content: counter(step); }
+        .step-text h3 { font-size: 1em; margin-bottom: 2px; }
+        .step-text p { color: var(--muted); font-size: 0.9em; }
+        .cta {
+            text-align: center;
+            padding: 48px 0;
+        }
+        .cta a {
+            display: inline-block;
+            background: var(--accent);
+            color: var(--bg);
+            padding: 14px 40px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+        .cta a:hover { opacity: 0.9; }
+        .pricing {
+            text-align: center;
+            margin: 24px 0;
+        }
+        .pricing .price {
+            font-size: 2em;
+            font-weight: 800;
+        }
+        .pricing .period { color: var(--muted); }
+        .pricing .trial { color: var(--accent); font-weight: 600; margin-top: 8px; }
+        footer {
+            text-align: center;
+            padding: 48px 0;
+            color: var(--muted);
+            font-size: 0.85em;
+            border-top: 1px solid #222;
+        }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+        footer .links { margin-bottom: 12px; }
+        footer .links a { margin: 0 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="icon">🛡️</div>
+            <h1><span>Phosphor</span></h1>
+            <p class="tagline">System-wide URL filtering for iOS 26 — powered by Apple's Private Information Retrieval. We never see the URLs you visit.</p>
+            <div class="hero-badge">First app built on NEURLFilterManager</div>
+        </header>
+
+        <div class="features">
+            <div class="feature">
+                <h3>Block Ads</h3>
+                <p>Remove ads across Safari and every app on your device.</p>
+            </div>
+            <div class="feature">
+                <h3>Stop Trackers</h3>
+                <p>Prevent cross-site tracking and fingerprinting.</p>
+            </div>
+            <div class="feature">
+                <h3>Block Malware</h3>
+                <p>Protection from known malicious domains.</p>
+            </div>
+            <div class="feature">
+                <h3>Filter Content</h3>
+                <p>Block adult and explicit content domains.</p>
+            </div>
+        </div>
+
+        <div class="privacy-section">
+            <h2>Privacy by Design</h2>
+            <p>Phosphor uses Apple's <strong>Private Information Retrieval (PIR)</strong> with homomorphic encryption. Your device checks URLs locally using a Bloom filter. For potential matches, encrypted queries go through Apple's relay — <strong>we can't see what you're browsing</strong>.</p>
+            <p>Zero telemetry. No analytics SDKs. No crash reporters. Nothing phones home.</p>
+        </div>
+
+        <h2>How It Works</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num"></div>
+                <div class="step-text">
+                    <h3>Bloom Filter (On-Device)</h3>
+                    <p>A compact data structure instantly checks if a URL might be blocked. ~99.9% of URLs are cleared here with zero network traffic.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num"></div>
+                <div class="step-text">
+                    <h3>Encrypted PIR Query</h3>
+                    <p>For potential matches, the system sends a homomorphically encrypted query. The server processes it without ever decrypting it.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num"></div>
+                <div class="step-text">
+                    <h3>Apple's OHTTP Relay</h3>
+                    <p>Queries route through Apple's relay. Your IP is hidden from our server; query content is hidden from Apple. Neither sees both.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num"></div>
+                <div class="step-text">
+                    <h3>Block or Allow</h3>
+                    <p>The encrypted response is decrypted on your device. The app never learns which URL was checked.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="pricing">
+            <div class="price">$29.99<span class="period">/month</span></div>
+            <p class="trial">7-day free trial</p>
+            <p class="period">or $249.99/year (save ~30%)</p>
+        </div>
+
+        <div class="cta">
+            <a href="https://apps.apple.com/app/phosphor">Download on the App Store</a>
+        </div>
+
+        <footer>
+            <div class="links">
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/terms">Terms of Service</a>
+                <a href="https://github.com/victorantos/Phosphor">GitHub</a>
+                <a href="mailto:support@phosphor.online">Support</a>
+            </div>
+            <p>&copy; 2026 Phosphor. Built with Apple's NEURLFilterManager API.</p>
+        </footer>
+    </div>
+</body>
+</html>
