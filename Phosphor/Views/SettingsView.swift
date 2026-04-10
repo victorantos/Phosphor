@@ -2,13 +2,16 @@ import PhosphorShared
 import SwiftUI
 
 struct SettingsView: View {
+    @Environment(SubscriptionManager.self) private var subscriptionManager
     @State private var viewModel = SettingsViewModel()
     @State private var showingImportPicker = false
     @State private var showingPauseOptions = false
+    @State private var showingPaywall = false
 
     var body: some View {
         NavigationStack {
             List {
+                subscriptionSection
                 filteringSection
                 pauseSection
                 updateSection
@@ -35,6 +38,63 @@ struct SettingsView: View {
                     ShareSheet(items: [url])
                 }
             }
+        }
+    }
+
+    // MARK: - Subscription
+
+    private var subscriptionSection: some View {
+        Section {
+            if subscriptionManager.isSubscribed {
+                HStack {
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Phosphor Premium")
+                                .fontWeight(.semibold)
+                            Text("Active subscription")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "checkmark.seal.fill")
+                            .foregroundStyle(PhosphorTheme.accent)
+                    }
+                    Spacer()
+                }
+                Button("Manage Subscription") {
+                    if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                        UIApplication.shared.open(url)
+                    }
+                }
+            } else {
+                HStack {
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Phosphor Premium")
+                                .fontWeight(.semibold)
+                            Text("Subscribe to enable URL filtering")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "lock.fill")
+                            .foregroundStyle(.orange)
+                    }
+                    Spacer()
+                }
+                Button {
+                    showingPaywall = true
+                } label: {
+                    Text("View Plans")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(PhosphorTheme.accent)
+            }
+        }
+        .sheet(isPresented: $showingPaywall) {
+            PaywallView()
         }
     }
 

@@ -4,6 +4,8 @@ import SwiftUI
 @main
 struct PhosphorApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @State private var subscriptionManager = SubscriptionManager()
+    @State private var showPaywall = false
 
     init() {
         importBundledListsIfNeeded()
@@ -11,11 +13,31 @@ struct PhosphorApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if hasCompletedOnboarding {
-                ContentView()
-            } else {
-                OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
+            Group {
+                if !hasCompletedOnboarding {
+                    OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
+                } else {
+                    ContentView()
+                        .sheet(isPresented: $showPaywall) {
+                            PaywallView()
+                                .interactiveDismissDisabled()
+                        }
+                        .onAppear {
+                            Task {
+                                await subscriptionManager.updateSubscriptionStatus()
+                                if !subscriptionManager.isSubscribed {
+                                    showPaywall = true
+                                }
+                            }
+                        }
+                        .onChange(of: subscriptionManager.isSubscribed) { _, isSubscribed in
+                            if isSubscribed {
+                                showPaywall = false
+                            }
+                        }
+                }
             }
+            .environment(subscriptionManager)
         }
     }
 
