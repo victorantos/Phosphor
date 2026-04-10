@@ -54,3 +54,4 @@ PIRServer/pir-service-example/
 PIRServer/certs/
 PIRServer/data/processed/
 PIRServer/data/url-database.txtpb
+PIRServer/privacy-gateway-server-go/

@@ -16,40 +16,39 @@ struct SetupPage: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                Spacer(minLength: 40)
+        VStack(spacing: 16) {
+            Spacer(minLength: 4)
 
-                statusIcon
+            statusIcon
 
-                VStack(spacing: 8) {
-                    Text(titleText)
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .multilineTextAlignment(.center)
+            VStack(spacing: 8) {
+                Text(titleText)
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .multilineTextAlignment(.center)
 
-                    Text(subtitleText)
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .padding(.horizontal)
-
-                if let error = errorMessage {
-                    errorCard(error)
-                }
-
-                stepsCard
-
-                Spacer(minLength: 20)
-
-                actionButtons
-                    .padding(.horizontal, 32)
-                    .padding(.bottom, 60)
+                Text(subtitleText)
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            .padding(.horizontal)
+
+            if let error = errorMessage {
+                errorCard(error)
+            }
+
+            stepsCard
+
+            Spacer()
+
+            PageDots(currentPage: 2)
+
+            actionButtons
+                .padding(.horizontal, 24)
+                .safeAreaPadding(.bottom, 16)
         }
-        .scrollBounceBehavior(.basedOnSize)
         .background(Color(.systemGroupedBackground))
     }
 

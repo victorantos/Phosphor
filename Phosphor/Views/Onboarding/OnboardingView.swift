@@ -16,24 +16,11 @@ struct OnboardingView: View {
                 .tag(2)
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
-        .overlay(alignment: .bottom) {
-            pageIndicator
-                .padding(.bottom, 24)
-        }
         .background(Color(.systemGroupedBackground))
     }
 
     private var pageIndicator: some View {
-        HStack(spacing: 8) {
-            ForEach(0..<3) { index in
-                Circle()
-                    .fill(index == currentPage ? PhosphorTheme.accent : Color.secondary.opacity(0.3))
-                    .frame(width: 8, height: 8)
-                    .scaleEffect(index == currentPage ? 1.2 : 1.0)
-                    .animation(.easeInOut(duration: 0.2), value: currentPage)
-            }
-        }
-        .accessibilityLabel("Page \(currentPage + 1) of 3")
+        PageDots(currentPage: currentPage)
     }
 }
 
@@ -56,15 +43,18 @@ private struct WelcomePage: View {
                 FeatureRow(icon: "bolt.shield", title: "Fast & Efficient", detail: "On-device Bloom filter means zero latency for most URLs")
             }
         } action: {
-            Button {
-                withAnimation { currentPage = 1 }
-            } label: {
-                Text("Next")
-                    .frame(maxWidth: .infinity)
+            VStack(spacing: 16) {
+                PageDots(currentPage: currentPage)
+                Button {
+                    withAnimation { currentPage = 1 }
+                } label: {
+                    Text("Next")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(PhosphorTheme.accent)
+                .controlSize(.large)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(PhosphorTheme.accent)
-            .controlSize(.large)
         }
     }
 }
@@ -99,15 +89,18 @@ private struct PrivacyPage: View {
                 )
             }
         } action: {
-            Button {
-                withAnimation { currentPage = 2 }
-            } label: {
-                Text("Next")
-                    .frame(maxWidth: .infinity)
+            VStack(spacing: 16) {
+                PageDots(currentPage: currentPage)
+                Button {
+                    withAnimation { currentPage = 2 }
+                } label: {
+                    Text("Next")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(PhosphorTheme.accent)
+                .controlSize(.large)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(PhosphorTheme.accent)
-            .controlSize(.large)
         }
     }
 }
@@ -124,8 +117,8 @@ private struct OnboardingPageLayout<Content: View, Action: View>: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
-                Spacer(minLength: 40)
+            VStack(spacing: 14) {
+                Spacer(minLength: 8)
 
                 Image(systemName: icon)
                     .font(.system(size: 64))
@@ -149,11 +142,11 @@ private struct OnboardingPageLayout<Content: View, Action: View>: View {
                 content
                     .padding(.horizontal)
 
-                Spacer(minLength: 20)
+                Spacer(minLength: 8)
 
                 action
-                    .padding(.horizontal, 32)
-                    .padding(.bottom, 60)
+                    .padding(.horizontal, 24)
+                    .safeAreaPadding(.bottom, 16)
             }
         }
         .scrollBounceBehavior(.basedOnSize)
@@ -216,6 +209,25 @@ private struct PrivacyCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
         .accessibilityElement(children: .combine)
+    }
+}
+
+// MARK: - Page Dots
+
+struct PageDots: View {
+    let currentPage: Int
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(0..<3) { index in
+                Circle()
+                    .fill(index == currentPage ? PhosphorTheme.accent : Color.secondary.opacity(0.3))
+                    .frame(width: 8, height: 8)
+                    .scaleEffect(index == currentPage ? 1.2 : 1.0)
+                    .animation(.easeInOut(duration: 0.2), value: currentPage)
+            }
+        }
+        .accessibilityLabel("Page \(currentPage + 1) of 3")
     }
 }
 

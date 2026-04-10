@@ -6,7 +6,6 @@ struct DashboardView: View {
     @State private var viewModel = DashboardViewModel()
     @State private var hasAppeared = false
 
-    /// True only when the system filter is actually running.
     private var isFilterRunning: Bool {
         viewModel.filterIsEnabled && viewModel.filterStatus == "Running"
     }
@@ -20,7 +19,7 @@ struct DashboardView: View {
                     statsContent
                 }
             }
-            .contentMargins(.bottom, 80, for: .scrollContent)
+            .safeAreaPadding(.bottom, 20)
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Dashboard")
             .refreshable { viewModel.load() }
@@ -37,22 +36,21 @@ struct DashboardView: View {
 
     private var emptyState: some View {
         VStack(spacing: 20) {
-            Spacer(minLength: 20)
-
             Image(systemName: isFilterRunning ? "shield.checkered" : "shield.slash")
-                .font(.system(size: 64))
+                .font(.system(size: 72))
                 .foregroundStyle(isFilterRunning ? PhosphorTheme.accent : .secondary)
+                .padding(.top, 8)
                 .accessibilityHidden(true)
 
-            VStack(spacing: 8) {
+            VStack(spacing: 10) {
                 Text(isFilterRunning ? "Filtering Active" : "Filtering Not Active")
-                    .font(.title2)
+                    .font(.title)
                     .fontWeight(.bold)
 
                 Text(isFilterRunning
                     ? "Block stats will appear here as URLs are filtered."
                     : "URL filtering is not running. Enable it to block ads, trackers, and malware across all apps.")
-                    .font(.subheadline)
+                    .font(.body)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
@@ -65,12 +63,12 @@ struct DashboardView: View {
                     .fill(statusColor)
                     .frame(width: 10, height: 10)
                 Text(viewModel.filterStatus)
-                    .font(.subheadline)
+                    .font(.body)
                     .fontWeight(.medium)
                     .foregroundStyle(.secondary)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 12)
             .background(.regularMaterial, in: Capsule())
 
             if !isFilterRunning {
@@ -78,18 +76,37 @@ struct DashboardView: View {
                     UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
                 } label: {
                     Label("Set Up Filtering", systemImage: "slider.horizontal.3")
+                        .font(.headline)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(PhosphorTheme.accent)
                 .controlSize(.large)
-                .padding(.horizontal, 32)
+                .padding(.horizontal, 24)
             }
 
-            statusCard
-                .padding(.horizontal)
+            // Summary cards
+            VStack(spacing: 12) {
+                statusCard
 
-            Spacer(minLength: 20)
+                HStack(spacing: 12) {
+                    summaryCard(
+                        icon: "shield.checkered",
+                        title: "Categories",
+                        value: "\(viewModel.enabledListCount)"
+                    )
+                    summaryCard(
+                        icon: "doc.text",
+                        title: "Total Rules",
+                        value: viewModel.totalRuleCount.formatted()
+                    )
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+        }
+        .containerRelativeFrame(.vertical) { height, _ in
+            max(height, 500)
         }
         .frame(maxWidth: .infinity)
     }
@@ -112,8 +129,10 @@ struct DashboardView: View {
             categoryChart
             trendChart
             statusCard
+                .padding(.horizontal)
         }
-        .padding()
+        .padding(.horizontal)
+        .padding(.vertical, 8)
         .opacity(hasAppeared ? 1 : 0)
         .offset(y: hasAppeared ? 0 : 12)
     }
@@ -123,11 +142,11 @@ struct DashboardView: View {
     private var heroCard: some View {
         VStack(spacing: 8) {
             Text("Blocked Today")
-                .font(.subheadline)
+                .font(.headline)
                 .foregroundStyle(.secondary)
 
             Text(viewModel.todayBlocks.formatted())
-                .font(.system(size: 64, weight: .bold, design: .rounded))
+                .font(.system(size: 72, weight: .bold, design: .rounded))
                 .foregroundStyle(PhosphorTheme.accent)
                 .contentTransition(.numericText())
                 .animation(PhosphorTheme.dataAnimation, value: viewModel.todayBlocks)
@@ -137,7 +156,7 @@ struct DashboardView: View {
                 .foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 28)
+        .padding(.vertical, 32)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: PhosphorTheme.cardRadius))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(viewModel.todayBlocks) threats blocked today")
@@ -156,16 +175,15 @@ struct DashboardView: View {
     // MARK: - Category Donut Chart
 
     private var categoryChart: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("By Category")
                 .font(.headline)
-                .padding(.horizontal, 4)
 
             if viewModel.categoryBreakdown.isEmpty {
                 Text("No data yet")
-                    .font(.subheadline)
+                    .font(.body)
                     .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, minHeight: 100)
+                    .frame(maxWidth: .infinity, minHeight: 120)
             } else {
                 HStack(spacing: 24) {
                     Chart(viewModel.categoryBreakdown) { point in
@@ -178,30 +196,27 @@ struct DashboardView: View {
                         .cornerRadius(4)
                         .accessibilityLabel("\(point.category.displayName): \(point.count) blocks")
                     }
-                    .frame(height: 140)
+                    .frame(height: 160)
                     .chartLegend(.hidden)
 
-                    VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 12) {
                         ForEach(viewModel.categoryBreakdown) { point in
                             HStack(spacing: 8) {
                                 Circle()
                                     .fill(colorForCategory(point.category))
-                                    .frame(width: 10, height: 10)
+                                    .frame(width: 12, height: 12)
                                     .accessibilityHidden(true)
                                 Text(point.category.displayName)
-                                    .font(.subheadline)
+                                    .font(.body)
                                 Spacer()
                                 Text(point.count.formatted())
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
+                                    .font(.body)
+                                    .fontWeight(.semibold)
                                     .foregroundStyle(.secondary)
                             }
-                            .accessibilityElement(children: .combine)
-                            .accessibilityLabel("\(point.category.displayName), \(point.count) blocks")
                         }
                     }
                 }
-                .padding(4)
             }
         }
         .padding()
@@ -212,17 +227,16 @@ struct DashboardView: View {
     // MARK: - Trend Line Chart
 
     private var trendChart: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("14-Day Trend")
                 .font(.headline)
-                .padding(.horizontal, 4)
 
             let trend = viewModel.dailyTrend(days: 14)
             if trend.allSatisfy({ $0.count == 0 }) {
                 Text("No data yet")
-                    .font(.subheadline)
+                    .font(.body)
                     .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, minHeight: 100)
+                    .frame(maxWidth: .infinity, minHeight: 120)
             } else {
                 Chart(trend) { point in
                     AreaMark(
@@ -245,9 +259,8 @@ struct DashboardView: View {
                     .foregroundStyle(PhosphorTheme.accent)
                     .interpolationMethod(.catmullRom)
                     .lineStyle(StrokeStyle(lineWidth: 2))
-                    .accessibilityLabel("\(point.date.formatted(.dateTime.month().day())): \(point.count) blocks")
                 }
-                .frame(height: 180)
+                .frame(height: 200)
                 .chartXAxis {
                     AxisMarks(values: .stride(by: .day, count: 3)) { _ in
                         AxisGridLine()
@@ -267,7 +280,7 @@ struct DashboardView: View {
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: PhosphorTheme.cardRadius))
     }
 
-    // MARK: - Status Card
+    // MARK: - Cards
 
     private var statusCard: some View {
         HStack(spacing: 14) {
@@ -276,10 +289,10 @@ struct DashboardView: View {
                 .font(.title2)
                 .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("\(viewModel.enabledListCount) active list\(viewModel.enabledListCount == 1 ? "" : "s")")
                     .font(.body)
-                    .fontWeight(.medium)
+                    .fontWeight(.semibold)
                 Text("\(viewModel.totalRuleCount.formatted()) rules loaded")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -288,9 +301,25 @@ struct DashboardView: View {
             Spacer()
         }
         .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(viewModel.enabledListCount) active lists with \(viewModel.totalRuleCount) rules loaded")
+    }
+
+    private func summaryCard(icon: String, title: String, value: String) -> some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(PhosphorTheme.accent)
+            Text(value)
+                .font(.title2)
+                .fontWeight(.bold)
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 20)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
     }
 
     // MARK: - Helpers
@@ -315,11 +344,11 @@ private struct PeriodCard: View {
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: icon)
-                .font(.subheadline)
+                .font(.body)
                 .foregroundStyle(.secondary)
                 .accessibilityHidden(true)
             Text(count.formatted())
-                .font(.title2)
+                .font(.title)
                 .fontWeight(.bold)
                 .foregroundStyle(PhosphorTheme.accent)
                 .contentTransition(.numericText())
@@ -329,15 +358,11 @@ private struct PeriodCard: View {
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .padding(.vertical, 20)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(count) blocks \(title.lowercased())")
     }
-}
-
-#Preview("With Data") {
-    DashboardView()
 }
 
 #Preview("Empty") {
