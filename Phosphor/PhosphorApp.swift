@@ -20,7 +20,6 @@ struct PhosphorApp: App {
                     ContentView()
                         .sheet(isPresented: $showPaywall) {
                             PaywallView()
-                                .interactiveDismissDisabled()
                         }
                         .onAppear {
                             Task {
