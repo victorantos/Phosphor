@@ -6,6 +6,8 @@ struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
 
     private let groupID = "phosphor_premium"
+    private let privacyPolicyURL = URL(string: "https://phosphor.online/privacy")!
+    private let termsOfServiceURL = URL(string: "https://phosphor.online/terms")!
 
     var body: some View {
         NavigationStack {
@@ -14,6 +16,9 @@ struct PaywallView: View {
             }
             .subscriptionStorePickerItemBackground(.thinMaterial)
             .storeButton(.visible, for: .restorePurchases)
+            .storeButton(.visible, for: .policies)
+            .subscriptionStorePolicyDestination(url: privacyPolicyURL, for: .privacyPolicy)
+            .subscriptionStorePolicyDestination(url: termsOfServiceURL, for: .termsOfService)
             .onInAppPurchaseCompletion { _, result in
                 switch result {
                 case .success(.success):
@@ -64,8 +69,31 @@ struct PaywallView: View {
             .padding()
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
             .padding(.horizontal)
+
+            subscriptionTerms
         }
         .padding(.top, 8)
+    }
+
+    // MARK: - Subscription Terms & Legal Links
+
+    private var subscriptionTerms: some View {
+        VStack(spacing: 10) {
+            Text("Phosphor Premium is an auto-renewing subscription. Choose Monthly ($29.99/month) or Yearly ($249.99/year). Each plan includes a 1-week free trial. Payment is charged to your Apple ID at confirmation. The subscription renews automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in App Store settings.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: 16) {
+                Link("Terms of Use (EULA)", destination: termsOfServiceURL)
+                Text("·").foregroundStyle(.secondary)
+                Link("Privacy Policy", destination: privacyPolicyURL)
+            }
+            .font(.caption2)
+        }
+        .padding(.horizontal)
+        .padding(.top, 4)
     }
 }
 
