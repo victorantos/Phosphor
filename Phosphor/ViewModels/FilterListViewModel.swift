@@ -43,7 +43,7 @@ final class FilterListViewModel {
         updated.isEnabled.toggle()
         do {
             try store.upsertList(updated)
-            PrefilterStore.scheduleRebuild()
+            FilterRefresher.listsChanged()
             load()
         } catch {
             errorMessage = error.localizedDescription
@@ -61,7 +61,7 @@ final class FilterListViewModel {
         )
         do {
             try store.upsertList(list)
-            PrefilterStore.scheduleRebuild()
+            FilterRefresher.listsChanged()
             load()
             Self.logger.info("Added custom list '\(name)'")
         } catch {
@@ -88,7 +88,7 @@ final class FilterListViewModel {
             var rules = try store.loadRules(for: list)
             rules.append(FilterRule(url: url, action: action))
             try store.saveRules(rules, for: &list)
-            PrefilterStore.scheduleRebuild()
+            FilterRefresher.listsChanged()
             load()
             Self.logger.info("Added manual \(action.rawValue) entry: \(url)")
         } catch {
@@ -101,7 +101,7 @@ final class FilterListViewModel {
     func removeList(_ list: FilterList) {
         do {
             try store.removeList(id: list.id)
-            PrefilterStore.scheduleRebuild()
+            FilterRefresher.listsChanged()
             load()
             Self.logger.info("Removed list '\(list.name)'")
         } catch {
@@ -115,7 +115,7 @@ final class FilterListViewModel {
             var rules = try store.loadRules(for: mutableList)
             rules.removeAll { $0.id == rule.id }
             try store.saveRules(rules, for: &mutableList)
-            PrefilterStore.scheduleRebuild()
+            FilterRefresher.listsChanged()
             load()
         } catch {
             errorMessage = error.localizedDescription
@@ -143,7 +143,7 @@ final class FilterListViewModel {
 
             let rules = domains.map { FilterRule(url: $0) }
             try store.saveRules(rules, for: &mutableList)
-            PrefilterStore.scheduleRebuild()
+            FilterRefresher.listsChanged()
             load()
 
             Self.logger.info("Refreshed '\(list.name)': \(domains.count) domains")

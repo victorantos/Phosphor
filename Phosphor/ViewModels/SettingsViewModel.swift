@@ -90,7 +90,7 @@ final class SettingsViewModel {
             var updated = list
             updated.isEnabled = !anyEnabled
             try? store.upsertList(updated)
-            PrefilterStore.scheduleRebuild()
+            FilterRefresher.listsChanged()
         }
         load()
     }
@@ -186,7 +186,7 @@ final class SettingsViewModel {
             decoder.dateDecodingStrategy = .iso8601
             let config = try decoder.decode(ExportedConfig.self, from: data)
             try store.saveLists(config.lists)
-            PrefilterStore.scheduleRebuild()
+            FilterRefresher.listsChanged()
             if let freq = UpdateFrequency(rawValue: config.updateFrequency) {
                 setUpdateFrequency(freq)
             }

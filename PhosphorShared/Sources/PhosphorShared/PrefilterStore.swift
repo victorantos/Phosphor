@@ -74,11 +74,10 @@ public final class PrefilterStore: Sendable {
         return metadata
     }
 
-    /// Rebuild in the background after the lists change.
-    public static func scheduleRebuild() {
-        Task.detached(priority: .utility) {
-            await Rebuilder.shared.rebuild()
-        }
+    /// Rebuilds from the current lists and returns the saved filter's parameters, or nil
+    /// when there is nothing to block. Rebuilds run one at a time.
+    public static func rebuildFromCurrentLists() async -> PrefilterMetadata? {
+        await Rebuilder.shared.rebuild()
     }
 
     /// Runs rebuilds one at a time so the saved bytes and parameters always match.
@@ -86,11 +85,12 @@ public final class PrefilterStore: Sendable {
         static let shared = Rebuilder()
         private let logger = Logger(subsystem: "com.nestclaw.phosphor", category: "PrefilterStore")
 
-        func rebuild() {
+        func rebuild() -> PrefilterMetadata? {
             do {
-                try PrefilterStore().rebuild(from: FilterListStore())
+                return try PrefilterStore().rebuild(from: FilterListStore())
             } catch {
                 logger.error("Rebuilding prefilter failed: \(error.localizedDescription, privacy: .public)")
+                return nil
             }
         }
     }
