@@ -1,0 +1,16 @@
+{
+    "issuerRequestUri": "https://pir.example.com",
+    "users": [
+        {
+            "tier": "tier1",
+            "tokens": ["your-pir-auth-token"]
+        }
+    ],
+    "usecases": [
+        {
+            "name": "com.example.phosphor.url.filtering",
+            "fileStem": "/path/to/PIRServer/data/processed/shard",
+            "shardCount": 4
+        }
+    ]
+}

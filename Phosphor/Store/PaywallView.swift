@@ -5,13 +5,15 @@ struct PaywallView: View {
     @Environment(SubscriptionManager.self) private var subscriptionManager
     @Environment(\.dismiss) private var dismiss
 
-    private let groupID = "phosphor_premium"
+    /// Looked up by product ID: the subscription group's identifier is assigned by
+    /// App Store Connect and differs from the one in the local StoreKit file.
+    private let productIDs = [SubscriptionManager.monthlyID, SubscriptionManager.yearlyID]
     private let privacyPolicyURL = URL(string: "https://phosphor.online/privacy")!
     private let termsOfServiceURL = URL(string: "https://phosphor.online/terms")!
 
     var body: some View {
         NavigationStack {
-            SubscriptionStoreView(groupID: groupID) {
+            SubscriptionStoreView(productIDs: productIDs) {
                 marketingContent
             }
             .subscriptionStorePickerItemBackground(.thinMaterial)

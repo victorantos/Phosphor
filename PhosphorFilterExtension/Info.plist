@@ -14,14 +14,23 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>XPC!</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>3</string>
 	<key>EXAppExtensionAttributes</key>
 	<dict>
 		<key>EXExtensionPointIdentifier</key>
 		<string>com.apple.networkextension.url-filter-control</string>
+	</dict>
+	<key>NSPIRConfiguration</key>
+	<dict>
+		<key>PIRServerURL</key>
+		<string>https://pir.phosphor.online</string>
+		<key>PrivacyPassIssuerURL</key>
+		<string>https://pir.phosphor.online</string>
 	</dict>
 </dict>
 </plist>

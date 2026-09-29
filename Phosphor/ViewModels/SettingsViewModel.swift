@@ -1,4 +1,5 @@
 import Foundation
+import NetworkExtension
 import Observation
 import os
 import PhosphorShared
@@ -11,6 +12,8 @@ final class SettingsViewModel {
 
     var lists: [FilterList] = []
     var pauseEndDate: Date?
+    /// Whether the system URL filter is actually running, as opposed to merely not paused.
+    var filterIsRunning = false
     var updateFrequency: UpdateFrequency = .daily
     var errorMessage: String?
     var showExportShareSheet = false
@@ -40,8 +43,7 @@ final class SettingsViewModel {
            let freq = UpdateFrequency(rawValue: raw) {
             updateFrequency = freq
         }
-        if let pauseEnd = PhosphorConstants.sharedDefaults?.object(forKey: "pauseEndDate") as? Date,
-           pauseEnd > .now {
+        if let pauseEnd = FilterPause.endDate, pauseEnd > .now {
             pauseEndDate = pauseEnd
         }
     }
@@ -53,6 +55,25 @@ final class SettingsViewModel {
             lists = try store.loadLists()
         } catch {
             Self.logger.error("Failed to load lists: \(error.localizedDescription)")
+        }
+        Task { await loadFilterStatus() }
+    }
+
+    func loadFilterStatus() async {
+        let manager = NEURLFilterManager.shared
+        do {
+            try await manager.loadFromPreferences()
+            let status = await manager.status
+            filterIsRunning = manager.isEnabled && status == .running
+        } catch {
+            filterIsRunning = false
+        }
+    }
+
+    func observeFilterStatus() async {
+        let manager = NEURLFilterManager.shared
+        for await status in manager.handleStatusChange() {
+            filterIsRunning = manager.isEnabled && status == .running
         }
     }
 
@@ -69,6 +90,7 @@ final class SettingsViewModel {
             var updated = list
             updated.isEnabled = !anyEnabled
             try? store.upsertList(updated)
+            PrefilterStore.scheduleRebuild()
         }
         load()
     }
@@ -96,14 +118,27 @@ final class SettingsViewModel {
             end = Calendar.current.startOfDay(for: .now).addingTimeInterval(86400)
         }
         pauseEndDate = end
-        PhosphorConstants.sharedDefaults?.set(end, forKey: "pauseEndDate")
-        Self.logger.info("Filtering paused until \(end)")
+        Task {
+            do {
+                try await FilterPause.pause(until: end)
+            } catch {
+                pauseEndDate = nil
+                errorMessage = "Could not pause filtering: \(error.localizedDescription)"
+            }
+            await loadFilterStatus()
+        }
     }
 
     func unpause() {
         pauseEndDate = nil
-        PhosphorConstants.sharedDefaults?.removeObject(forKey: "pauseEndDate")
-        Self.logger.info("Filtering resumed")
+        Task {
+            do {
+                try await FilterPause.resume()
+            } catch {
+                errorMessage = "Could not resume filtering: \(error.localizedDescription)"
+            }
+            await loadFilterStatus()
+        }
     }
 
     enum PauseDuration: String, CaseIterable {
@@ -151,6 +186,7 @@ final class SettingsViewModel {
             decoder.dateDecodingStrategy = .iso8601
             let config = try decoder.decode(ExportedConfig.self, from: data)
             try store.saveLists(config.lists)
+            PrefilterStore.scheduleRebuild()
             if let freq = UpdateFrequency(rawValue: config.updateFrequency) {
                 setUpdateFrequency(freq)
             }

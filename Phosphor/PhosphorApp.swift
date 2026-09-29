@@ -1,3 +1,4 @@
+import NetworkExtension
 import PhosphorShared
 import SwiftUI
 
@@ -6,6 +7,7 @@ struct PhosphorApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @State private var subscriptionManager = SubscriptionManager()
     @State private var showPaywall = false
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         importBundledListsIfNeeded()
@@ -37,7 +39,27 @@ struct PhosphorApp: App {
                 }
             }
             .environment(subscriptionManager)
+            .onChange(of: scenePhase, initial: true) { _, phase in
+                guard phase == .active else { return }
+                Task {
+                    await FilterPause.reconcile()
+                    await skipOnboardingIfFilterIsRunning()
+                    await FilterProbe.runIfRequested()
+                }
+            }
         }
+    }
+
+    /// Setup is re-entered by resetting onboarding. If the app is closed before the last
+    /// screen is dismissed, the filter is on but onboarding would show again.
+    private func skipOnboardingIfFilterIsRunning() async {
+        guard !hasCompletedOnboarding else { return }
+        let manager = NEURLFilterManager.shared
+        guard (try? await manager.loadFromPreferences()) != nil,
+              manager.isEnabled,
+              await manager.status == .running
+        else { return }
+        hasCompletedOnboarding = true
     }
 
     private func importBundledListsIfNeeded() {
@@ -46,6 +68,7 @@ struct PhosphorApp: App {
         guard !loader.hasImported else { return }
         Task.detached(priority: .utility) {
             try? loader.importIfNeeded()
+            try? PrefilterStore().rebuild(from: store)
         }
     }
 }

@@ -23,6 +23,7 @@ struct DashboardView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Dashboard")
             .refreshable { viewModel.load() }
+            .task { await viewModel.observeFilterStatus() }
             .onAppear {
                 viewModel.load()
                 withAnimation(PhosphorTheme.dataAnimation) {

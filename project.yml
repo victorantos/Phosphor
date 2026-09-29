@@ -33,10 +33,24 @@ targets:
       - target: PhosphorFilterExtension
         embed: true
         codeSign: true
+    configFiles:
+      Debug: Config/Phosphor.xcconfig
+      Release: Config/Phosphor.xcconfig
     info:
       path: Phosphor/Info.plist
       properties:
         CFBundleDisplayName: Phosphor
+        # Pinned here so `xcodegen generate` cannot silently reset the build
+        # number — it defaults to 1 for anything project.yml does not declare.
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "3"
+        # Supplied by Config/Secrets.xcconfig (gitignored).
+        PIRAuthenticationToken: $(PIR_AUTH_TOKEN)
+        # Must match PIRConfiguration.serverURL. iOS 27.3 rejects a filter whose
+        # runtime URLs differ from these.
+        NSPIRConfiguration:
+          PIRServerURL: https://pir.phosphor.online
+          PrivacyPassIssuerURL: https://pir.phosphor.online
         UILaunchScreen: {}
         UIRequiresFullScreen: false
         UIApplicationSceneManifest:
@@ -71,13 +85,24 @@ targets:
     platform: iOS
     sources:
       - path: PhosphorFilterExtension
-    dependencies: []
+    dependencies:
+      - package: PhosphorShared
     info:
       path: PhosphorFilterExtension/Info.plist
       properties:
         CFBundleDisplayName: Phosphor Filter
+        # XcodeGen omits this for ExtensionKit targets. Without it iOS does not
+        # register the extension and the filter fails to start.
+        CFBundlePackageType: "XPC!"
+        # Must match the app's version and build number.
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "3"
         EXAppExtensionAttributes:
           EXExtensionPointIdentifier: com.apple.networkextension.url-filter-control
+        # Required from iOS 27.3: the PIR URLs must be declared statically.
+        NSPIRConfiguration:
+          PIRServerURL: https://pir.phosphor.online
+          PrivacyPassIssuerURL: https://pir.phosphor.online
     entitlements:
       path: PhosphorFilterExtension/PhosphorFilterExtension.entitlements
       properties:

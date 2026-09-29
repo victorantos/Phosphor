@@ -1,8 +1,14 @@
 import NetworkExtension
+import os
 import PhosphorShared
 import SwiftUI
 
 struct SetupPage: View {
+    private static let logger = Logger(subsystem: "com.nestclaw.phosphor", category: "Setup")
+
+    /// How long to wait for the filter to report that it is running.
+    private static let startTimeoutSeconds = 90
+
     @Binding var hasCompletedOnboarding: Bool
     @State private var setupState: SetupState = .ready
     @State private var errorMessage: String?
@@ -68,7 +74,7 @@ struct SetupPage: View {
         case .ready:
             "Phosphor needs your permission to enable system-wide URL filtering. iOS will ask you to confirm in Settings."
         case .enabling:
-            "Saving filter configuration..."
+            "Starting the filter. The first time can take up to a minute."
         case .success:
             "Phosphor is now filtering URLs across your device. You can manage filter lists from the Lists tab."
         case .failed:
@@ -162,7 +168,7 @@ struct SetupPage: View {
             }
 
         case .enabling:
-            ProgressView("Saving configuration...")
+            ProgressView("Starting the filter...")
 
         case .success, .skipped:
             Button {
@@ -182,15 +188,36 @@ struct SetupPage: View {
     private func enableFilter() async {
         setupState = .enabling
         errorMessage = nil
+        FilterPause.clear()
 
-        let pirURL = URL(string: "https://pir.nestclaw.com")!
+        let pirURL = PIRConfiguration.serverURL
+
+        guard let authToken = PIRConfiguration.authenticationToken else {
+            errorMessage = "This build has no PIR authentication token. Add one to Config/Secrets.xcconfig and rebuild."
+            withAnimation { setupState = .failed }
+            return
+        }
 
         do {
+            // The extension cannot build the Bloom filter within its memory limit,
+            // so it must be on disk before the system asks for it.
+            let prefilter = try await Task.detached(priority: .userInitiated) {
+                let store = FilterListStore()
+                try BundledListLoader(store: store).importIfNeeded()
+                return try PrefilterStore().rebuild(from: store)
+            }.value
+            Self.logger.info("Prefilter ready: \(prefilter?.urlCount ?? 0) URLs")
+
             let manager = NEURLFilterManager.shared
 
             // Remove any existing invalid configuration first
-            try? await manager.loadFromPreferences()
-            try? await manager.removeFromPreferences()
+            do {
+                try await manager.loadFromPreferences()
+                try await manager.removeFromPreferences()
+                Self.logger.info("Removed existing filter configuration")
+            } catch {
+                Self.logger.error("Could not remove existing configuration: \(mapError(error), privacy: .public)")
+            }
 
             // Fresh configuration with HTTPS PIR server
             try await manager.loadFromPreferences()
@@ -198,7 +225,7 @@ struct SetupPage: View {
             try manager.setConfiguration(
                 pirServerURL: pirURL,
                 pirPrivacyPassIssuerURL: pirURL,
-                pirAuthenticationToken: "phosphor-dev-token",
+                pirAuthenticationToken: authToken,
                 controlProviderBundleIdentifier: PhosphorConstants.filterExtensionBundleID
             )
 
@@ -208,31 +235,56 @@ struct SetupPage: View {
             manager.prefilterFetchInterval = 86400
 
             try await manager.saveToPreferences()
-            withAnimation { setupState = .success }
-        } catch {
-            let code = (error as NSError).code
-            if code == 9 {
-                // "configuration is unchanged" — already saved, treat as success
-                withAnimation { setupState = .success }
-                return
+            Self.logger.info("Saved filter configuration for \(pirURL.absoluteString, privacy: .public)")
+
+            // A save can succeed while the system still rejects the configuration,
+            // so confirm it before telling the user they are protected.
+            try await manager.loadFromPreferences()
+
+            // Parameters cached for a previous server or token keep the filter from
+            // starting, so drop them and fetch fresh ones.
+            do {
+                try await manager.resetPIRCache()
+                Self.logger.info("Reset PIR cache")
+            } catch {
+                Self.logger.error("Resetting PIR cache failed: \(mapError(error), privacy: .public)")
+            }
+            do {
+                try await manager.refreshPIRParameters()
+                Self.logger.info("Refreshed PIR parameters")
+            } catch {
+                Self.logger.error("Refreshing PIR parameters failed: \(mapError(error), privacy: .public)")
             }
 
-            // If setConfiguration failed, try without it — maybe config already exists
-            do {
-                let manager = NEURLFilterManager.shared
-                try await manager.loadFromPreferences()
-                manager.isEnabled = true
-                try await manager.saveToPreferences()
-                withAnimation { setupState = .success }
-            } catch {
-                let retryCode = (error as NSError).code
-                if retryCode == 9 {
-                    withAnimation { setupState = .success }
-                } else {
-                    errorMessage = mapError(error)
-                    withAnimation { setupState = .failed }
-                }
+            // A first start is slow: the system fetches Privacy Pass tokens and uploads an
+            // evaluation key, and gives up and retries every 10 seconds until that is done.
+            var status = await manager.status
+            for _ in 0..<Self.startTimeoutSeconds where status != .running {
+                try? await Task.sleep(for: .seconds(1))
+                status = await manager.status
             }
+            Self.logger.info("Filter status after save: \(String(describing: status), privacy: .public), enabled: \(manager.isEnabled)")
+
+            guard manager.isEnabled, status == .running else {
+                let reason = await manager.lastDisconnectError
+                let details = [
+                    "status: \(String(describing: status))",
+                    "enabled: \(manager.isEnabled)",
+                    "reason: \(reason.map { "\(String(describing: $0)) (\($0.rawValue))" } ?? "none")",
+                    "server: \(manager.pirServerURL?.host() ?? "nil")",
+                    "provider: \(manager.controlProviderBundleIdentifier ?? "nil")",
+                    "app: \(manager.appBundleIdentifier ?? "nil")",
+                ].joined(separator: ", ")
+                Self.logger.error("Filter configuration rejected: \(details, privacy: .public)")
+                errorMessage = "The filter was saved but did not start (\(details))."
+                withAnimation { setupState = .failed }
+                return
+            }
+            withAnimation { setupState = .success }
+        } catch {
+            Self.logger.error("Applying filter configuration failed: \(mapError(error), privacy: .public)")
+            errorMessage = mapError(error)
+            withAnimation { setupState = .failed }
         }
     }
 

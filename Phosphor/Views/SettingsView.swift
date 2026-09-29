@@ -20,6 +20,7 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .onAppear { viewModel.load() }
+            .task { await viewModel.observeFilterStatus() }
             .alert("Error", isPresented: .init(
                 get: { viewModel.errorMessage != nil },
                 set: { if !$0 { viewModel.errorMessage = nil } }

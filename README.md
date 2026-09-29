@@ -69,6 +69,17 @@ Before building on a device, you need:
 
 > **Note:** NetworkExtension entitlements require an **organization** Apple Developer account, not an individual one. Simulator support for NetworkExtension is limited — test on a real device.
 
+### Secrets
+
+Secrets are kept out of the repository. Copy the example files and fill in your own values:
+
+```bash
+cp Config/Secrets.example.xcconfig Config/Secrets.xcconfig
+cp PIRServer/data/server-config.example.json PIRServer/data/server-config.json
+```
+
+`PIR_AUTH_TOKEN` in `Secrets.xcconfig` must match a token listed in your PIR server config. The token must be valid base64, for example 64 hex characters from `openssl rand -hex 32`; iOS silently ignores a token it cannot decode and the filter never starts. Re-run `xcodegen generate` after creating the file. Without it the app still builds, but it won't enable the filter.
+
 ### PIR Server
 
 The `NEURLFilterManager` API requires a PIR server for full URL verification. See [`PIRServer/README.md`](PIRServer/README.md) for setup instructions using Apple's reference implementation.
