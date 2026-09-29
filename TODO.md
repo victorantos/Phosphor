@@ -32,6 +32,14 @@ State as of 2026-09-29, end of day. URL filtering works on device for the first 
 
 ## Build
 
+- [ ] **Ads on ordinary sites are not blocked** (seen on bbc.co.uk). The ads list names
+      parent domains such as `doubleclick.net`, but iOS matches exact hostnames and ads
+      come from subdomains: `googleads.g.doubleclick.net`,
+      `securepubads.g.doubleclick.net`, `pagead2.googlesyndication.com`,
+      `tpc.googlesyndication.com` and `s0.2mdn.net` are all unlisted. Do both:
+      1. Add or switch to a list that names full hostnames (hosts format). Works on
+         iOS 26 and 27. The PIR database has to be reprocessed with the same entries.
+      2. Parent-domain matching on iOS 27, see the next item.
 - [ ] Subdomains of listed sites are not blocked (`ad.doubleclick.net` loads although
       `doubleclick.net` is listed). Needs `NEURLFilterManager.urlParsingConfiguration`,
       which is in the iOS 27 SDK only. Install Xcode 27, then add it behind an
