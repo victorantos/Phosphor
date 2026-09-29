@@ -91,6 +91,13 @@ struct FilterListsView: View {
                     }
                 }
             }
+
+            // iOS hands each app the filter when the app starts, so a running app keeps
+            // the lists it started with.
+            Section {
+            } footer: {
+                Text("Changes apply to an app the next time it is opened. Close Safari and open it again to see them there.")
+            }
         }
         .listStyle(.insetGrouped)
         .animation(PhosphorTheme.dataAnimation, value: viewModel.lists.map(\.id))

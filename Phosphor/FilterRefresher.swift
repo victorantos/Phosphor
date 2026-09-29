@@ -2,6 +2,7 @@ import Foundation
 import NetworkExtension
 import os
 import PhosphorShared
+import UIKit
 
 /// Makes the system filter follow changes to the lists.
 ///
@@ -25,6 +26,12 @@ enum FilterRefresher {
     }
 
     private static func apply() async {
+        // Filtering is off between the two saves. Without this the app can be suspended
+        // in that gap, when the user switches to Safari to try the change, and
+        // filtering stays off until the app is opened again.
+        let background = UIApplication.shared.beginBackgroundTask(withName: "Restart URL filter")
+        defer { UIApplication.shared.endBackgroundTask(background) }
+
         let previousTag = try? PrefilterStore().loadMetadata()?.tag
         let tag = await PrefilterStore.rebuildFromCurrentLists()?.tag
         guard tag != previousTag else { return }
@@ -36,9 +43,22 @@ enum FilterRefresher {
             guard manager.isEnabled else { return }
             manager.isEnabled = false
             try await manager.saveToPreferences()
+
+            // Switching straight back on is treated as no change and the filter keeps
+            // running with the old prefilter, so give the system a moment to stop it.
+            // A disabled filter reports `stopped` or `invalid`; the status also reads
+            // `invalid` right after a save, hence the fixed wait before checking.
+            try? await Task.sleep(for: .seconds(1))
+            var status = await manager.status
+            for _ in 0..<12 where status != .stopped && status != .invalid {
+                try? await Task.sleep(for: .milliseconds(250))
+                status = await manager.status
+            }
+
+            try await manager.loadFromPreferences()
             manager.isEnabled = true
             try await manager.saveToPreferences()
-            logger.info("Restarted the filter to load the new prefilter")
+            logger.info("Restarted the filter to load the new prefilter, was \(String(describing: status), privacy: .public)")
         } catch {
             logger.error("Restarting the filter failed: \(error.localizedDescription, privacy: .public)")
         }
