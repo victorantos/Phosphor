@@ -1,229 +1,418 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phosphor — Privacy-Preserving URL Filter for iOS</title>
-    <meta name="description" content="System-wide ad, tracker, and malware blocking for iOS 26. Powered by Apple's Private Information Retrieval — we never see the URLs you visit.">
-    <style>
-        :root {
-            --accent: #39FF7A;
-            --bg: #0a0a0a;
-            --card: #1a1a1a;
-            --text: #f0f0f0;
-            --muted: #888;
-            --radius: 16px;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-        }
-        .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
-        header {
-            text-align: center;
-            padding: 80px 0 40px;
-        }
-        header .icon {
-            font-size: 72px;
-            margin-bottom: 16px;
-        }
-        h1 {
-            font-size: 2.5em;
-            font-weight: 800;
-            margin-bottom: 8px;
-        }
-        h1 span { color: var(--accent); }
-        .tagline {
-            font-size: 1.2em;
-            color: var(--muted);
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        .hero-badge {
-            display: inline-block;
-            background: rgba(57, 255, 122, 0.15);
-            color: var(--accent);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 600;
-            margin-top: 20px;
-        }
-        .features {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin: 48px 0;
-        }
-        @media (max-width: 500px) { .features { grid-template-columns: 1fr; } }
-        .feature {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 24px;
-        }
-        .feature h3 { font-size: 1em; margin-bottom: 6px; }
-        .feature p { color: var(--muted); font-size: 0.9em; }
-        .privacy-section {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 32px;
-            margin: 48px 0;
-            border-left: 4px solid var(--accent);
-        }
-        .privacy-section h2 { margin-bottom: 16px; }
-        .privacy-section p { color: var(--muted); margin-bottom: 12px; }
-        .steps {
-            counter-reset: step;
-            margin: 48px 0;
-        }
-        .step {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        .step-num {
-            counter-increment: step;
-            width: 32px;
-            height: 32px;
-            background: var(--accent);
-            color: var(--bg);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.85em;
-            flex-shrink: 0;
-        }
-        .step-num::before { content: counter(step); }
-        .step-text h3 { font-size: 1em; margin-bottom: 2px; }
-        .step-text p { color: var(--muted); font-size: 0.9em; }
-        .cta {
-            text-align: center;
-            padding: 48px 0;
-        }
-        .cta a {
-            display: inline-block;
-            background: var(--accent);
-            color: var(--bg);
-            padding: 14px 40px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 1.1em;
-        }
-        .cta a:hover { opacity: 0.9; }
-        .pricing {
-            text-align: center;
-            margin: 24px 0;
-        }
-        .pricing .price {
-            font-size: 2em;
-            font-weight: 800;
-        }
-        .pricing .period { color: var(--muted); }
-        .pricing .trial { color: var(--accent); font-weight: 600; margin-top: 8px; }
-        footer {
-            text-align: center;
-            padding: 48px 0;
-            color: var(--muted);
-            font-size: 0.85em;
-            border-top: 1px solid #222;
-        }
-        footer a { color: var(--accent); text-decoration: none; }
-        footer a:hover { text-decoration: underline; }
-        footer .links { margin-bottom: 12px; }
-        footer .links a { margin: 0 12px; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phosphor — Blocks ads everywhere. Sees nothing.</title>
+<meta name="description" content="System-wide ad, tracker, malware and adult-content filtering for iOS 26. Built on Apple's Private Information Retrieval — the URLs you visit stay encrypted, even from us.">
+<meta name="theme-color" content="#0b0908">
+<link rel="canonical" href="https://phosphor.online/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://phosphor.online/">
+<meta property="og:title" content="Phosphor — Blocks ads everywhere. Sees nothing.">
+<meta property="og:description" content="System-wide URL filtering for iOS 26, built on Apple's Private Information Retrieval. Most URLs never leave your phone.">
+<meta property="og:image" content="https://phosphor.online/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="icon">🛡️</div>
-            <h1><span>Phosphor</span></h1>
-            <p class="tagline">System-wide URL filtering for iOS 26 — powered by Apple's Private Information Retrieval. We never see the URLs you visit.</p>
-            <div class="hero-badge">First app built on NEURLFilterManager</div>
-        </header>
 
-        <div class="features">
-            <div class="feature">
-                <h3>Block Ads</h3>
-                <p>Remove ads across Safari and every app on your device.</p>
-            </div>
-            <div class="feature">
-                <h3>Stop Trackers</h3>
-                <p>Prevent cross-site tracking and fingerprinting.</p>
-            </div>
-            <div class="feature">
-                <h3>Block Malware</h3>
-                <p>Protection from known malicious domains.</p>
-            </div>
-            <div class="feature">
-                <h3>Filter Content</h3>
-                <p>Block adult and explicit content domains.</p>
-            </div>
-        </div>
+<header class="site-header">
+  <div class="wrap">
+    <a class="wordmark" href="#top">
+      <svg width="24" height="24" viewBox="0 0 64 64" aria-hidden="true"><circle cx="38" cy="22" r="15" fill="#39ff7a" opacity=".16"/><rect x="16" y="12" width="10" height="40" rx="5" fill="#f6f3ee"/><circle cx="38" cy="22" r="10" fill="#39ff7a"/></svg>
+      <span>phosphor</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#how">How it works</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">Support</a>
+      <a href="https://github.com/victorantos/Phosphor">GitHub<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+    </nav>
+    <a class="btn btn-primary btn--sm nav-cta" href="https://apps.apple.com/app/phosphor">Get the app</a>
+    <button class="nav-toggle" data-nav-toggle type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menu-sheet">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg>
+    </button>
+  </div>
+</header>
 
-        <div class="privacy-section">
-            <h2>Privacy by Design</h2>
-            <p>Phosphor uses Apple's <strong>Private Information Retrieval (PIR)</strong> with homomorphic encryption. Your device checks URLs locally using a Bloom filter. For potential matches, encrypted queries go through Apple's relay — <strong>we can't see what you're browsing</strong>.</p>
-            <p>Zero telemetry. No analytics SDKs. No crash reporters. Nothing phones home.</p>
-        </div>
+<div class="sheet-scrim" id="menu-scrim" hidden></div>
+<div class="sheet" id="menu-sheet" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+  <div class="sheet-grip"></div>
+  <a href="#how">How it works<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a847d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>
+  <a href="#privacy">Privacy<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a847d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>
+  <a href="#pricing">Pricing<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a847d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>
+  <a href="#faq">Support<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a847d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>
+  <a href="https://github.com/victorantos/Phosphor">GitHub<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a847d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+  <a class="btn btn-primary btn--block" href="https://apps.apple.com/app/phosphor">Download on the App Store</a>
+</div>
 
-        <h2>How It Works</h2>
-        <div class="steps">
-            <div class="step">
-                <div class="step-num"></div>
-                <div class="step-text">
-                    <h3>Bloom Filter (On-Device)</h3>
-                    <p>A compact data structure instantly checks if a URL might be blocked. ~99.9% of URLs are cleared here with zero network traffic.</p>
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-num"></div>
-                <div class="step-text">
-                    <h3>Encrypted PIR Query</h3>
-                    <p>For potential matches, the system sends a homomorphically encrypted query. The server processes it without ever decrypting it.</p>
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-num"></div>
-                <div class="step-text">
-                    <h3>Apple's OHTTP Relay</h3>
-                    <p>Queries route through Apple's relay. Your IP is hidden from our server; query content is hidden from Apple. Neither sees both.</p>
-                </div>
-            </div>
-            <div class="step">
-                <div class="step-num"></div>
-                <div class="step-text">
-                    <h3>Block or Allow</h3>
-                    <p>The encrypted response is decrypted on your device. The app never learns which URL was checked.</p>
-                </div>
-            </div>
-        </div>
+<main>
 
-        <div class="pricing">
-            <div class="price">$29.99<span class="period">/month</span></div>
-            <p class="trial">7-day free trial</p>
-            <p class="period">or $249.99/year (save ~30%)</p>
-        </div>
-
-        <div class="cta">
-            <a href="https://apps.apple.com/app/phosphor">Download on the App Store</a>
-        </div>
-
-        <footer>
-            <div class="links">
-                <a href="/privacy">Privacy Policy</a>
-                <a href="/terms">Terms of Service</a>
-                <a href="https://github.com/victorantos/Phosphor">GitHub</a>
-                <a href="mailto:support@phosphor.online">Support</a>
-            </div>
-            <p>&copy; 2026 Phosphor. Built with Apple's NEURLFilterManager API.</p>
-        </footer>
+<!-- ═══ Hero ═══════════════════════════════════════════════════════════ -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <div class="hero-copy">
+      <p class="hero-flag"><span class="pulse" aria-hidden="true"><i></i></span><span>For iPhone &amp; iPad · iOS 26 · Open source</span></p>
+      <h1 class="display">Blocks ads everywhere.<br><em>Sees nothing.</em></h1>
+      <p class="lede">Phosphor filters ads, trackers, malware and adult content across Safari and every app on iOS&nbsp;26. It runs on Apple's Private Information Retrieval, so the URLs you visit stay encrypted — even from us.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://apps.apple.com/app/phosphor">Download on the App Store<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+        <a class="btn btn-ghost" href="#how">How it works<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a>
+      </div>
+      <p class="fine hero-terms">7-day free trial · then $29.99/month or $249.99/year · cancel anytime</p>
     </div>
+
+    <div class="hero-device">
+      <div class="phone-stage" data-phone-stage>
+        <div class="phone-scaler">
+          <div class="phone" role="img" aria-label="The Phosphor dashboard on iPhone, showing 1,284 threats blocked today across four filter lists.">
+            <div class="phone-island"></div>
+            <div class="phone-status" aria-hidden="true">
+              <span>9:41</span>
+              <span class="phone-status-icons">
+                <svg width="19" height="12" viewBox="0 0 19 12"><rect x="0" y="7.5" width="3.2" height="4.5" rx=".7" fill="#fff"/><rect x="4.8" y="5" width="3.2" height="7" rx=".7" fill="#fff"/><rect x="9.6" y="2.5" width="3.2" height="9.5" rx=".7" fill="#fff"/><rect x="14.4" y="0" width="3.2" height="12" rx=".7" fill="#fff"/></svg>
+                <svg width="17" height="12" viewBox="0 0 17 12"><path d="M8.5 3.2c2.3 0 4.4.9 5.9 2.4l1.1-1.1A9.7 9.7 0 0 0 8.5 1.5 9.7 9.7 0 0 0 1.5 4.5l1.1 1.1A8.2 8.2 0 0 1 8.5 3.2Z" fill="#fff"/><path d="M8.5 6.8c1.4 0 2.6.5 3.5 1.4l1.1-1.1A6.5 6.5 0 0 0 8.5 5.1 6.5 6.5 0 0 0 3.9 7.1L5 8.2a4.9 4.9 0 0 1 3.5-1.4Z" fill="#fff"/><circle cx="8.5" cy="10.5" r="1.5" fill="#fff"/></svg>
+                <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="#fff" stroke-opacity=".35" fill="none"/><rect x="2" y="2" width="20" height="9" rx="2" fill="#fff"/><path d="M25 4.5v4c.8-.3 1.5-1.3 1.5-2s-.7-1.7-1.5-2Z" fill="#fff" fill-opacity=".4"/></svg>
+              </span>
+            </div>
+
+            <div class="app">
+              <div class="app-top">
+                <span class="wordmark"><svg width="22" height="22" viewBox="0 0 64 64" aria-hidden="true"><circle cx="38" cy="22" r="15" fill="#39ff7a" opacity=".16"/><rect x="16" y="12" width="10" height="40" rx="5" fill="#f6f3ee"/><circle cx="38" cy="22" r="10" fill="#39ff7a"/></svg><span>phosphor</span></span>
+                <span class="app-status"><span class="pulse pulse--sm" aria-hidden="true"><i></i></span>Active</span>
+              </div>
+
+              <div class="app-hero">
+                <div class="app-hero-label">Blocked today</div>
+                <div class="app-hero-count">1,284</div>
+                <div class="app-hero-label" style="font-weight:400">threats stopped</div>
+              </div>
+
+              <div class="app-tiles">
+                <div class="app-tile"><b>8,913</b><span>This week</span></div>
+                <div class="app-tile"><b>31,204</b><span>This month</span></div>
+                <div class="app-tile"><b>210,556</b><span>All time</span></div>
+              </div>
+
+              <div class="app-panel">
+                <div class="app-panel-head"><span>By category</span><span class="mono" style="font-size:12px;color:var(--ink-400);font-weight:400">today</span></div>
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <div class="app-cat"><span>Ads</span><div class="bar bar--thick"><span style="width:62%"></span></div><span>796</span></div>
+                  <div class="app-cat"><span>Trackers</span><div class="bar bar--thick"><span style="width:28%;opacity:.75;box-shadow:none"></span></div><span>359</span></div>
+                  <div class="app-cat"><span>Adult</span><div class="bar bar--thick"><span style="width:7%;opacity:.5;box-shadow:none"></span></div><span>90</span></div>
+                  <div class="app-cat"><span>Malware</span><div class="bar bar--thick"><span style="width:3%;opacity:.35;box-shadow:none"></span></div><span>39</span></div>
+                </div>
+              </div>
+
+              <div class="app-panel">
+                <div class="app-panel-head"><span>14-day trend</span><span class="mono" style="font-size:12px;color:var(--ink-400);font-weight:400">Aug 23 – Sep 5</span></div>
+                <div class="app-trend" aria-hidden="true">
+                  <i style="height:22%;opacity:.35"></i><i style="height:35%;opacity:.40"></i><i style="height:28%;opacity:.45"></i><i style="height:40%;opacity:.50"></i>
+                  <i style="height:52%;opacity:.55"></i><i style="height:47%;opacity:.60"></i><i style="height:61%;opacity:.65"></i><i style="height:58%;opacity:.70"></i>
+                  <i style="height:66%;opacity:.75"></i><i style="height:72%;opacity:.80"></i><i style="height:64%;opacity:.85"></i><i style="height:80%;opacity:.90"></i>
+                  <i style="height:74%;opacity:.95"></i><i style="height:92%;opacity:1"></i>
+                </div>
+              </div>
+
+              <div class="app-row">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#39ff7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h.01"/><path d="M3 12h.01"/><path d="M3 19h.01"/><path d="M8 5h13"/><path d="M8 12h13"/><path d="M8 19h13"/></svg>
+                <div style="flex:1"><div style="font-size:15px;font-weight:600">4 active lists</div><div class="fine" style="margin-top:2px">123,211 rules loaded</div></div>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a847d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+              </div>
+            </div>
+
+            <div class="phone-home"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Numbers ════════════════════════════════════════════════════════ -->
+<section class="band">
+  <div class="wrap">
+    <div><b>123,211</b><span>domains on the built-in lists</span></div>
+    <div><b>~99.9%</b><span>of URLs cleared on-device, zero network</span></div>
+    <div><b>0</b><span>analytics SDKs, crash reporters, telemetry</span></div>
+    <div><b>MIT</b><span>licensed — the whole app is on GitHub</span></div>
+  </div>
+</section>
+
+<!-- ═══ What it blocks ═════════════════════════════════════════════════ -->
+<section class="section" id="blocks">
+  <div class="wrap">
+    <p class="eyebrow">What it blocks</p>
+    <h2 class="h-section">Four lists. Every app on the phone.</h2>
+    <p class="intro">Filtering happens at the system level, so it covers Safari, in-app browsers and any app that uses URLSession — not just one browser. Add your own hosts-format lists, or block and allow single domains by hand.</p>
+    <div class="grid">
+      <div class="card card--lift feature">
+        <span class="icon-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.636 6A13 13 0 0 0 19.4 3.2 1 1 0 0 1 21 4v11.344"/><path d="M14.378 14.357A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h1"/><path d="m2 2 20 20"/><path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/><path d="M8 8v6"/></svg></span>
+        <div><div class="h-card">Ads</div><p>Remove ads across Safari and every app on your device.</p></div>
+        <div class="feature-meter"><div class="bar"><span style="width:6%"></span></div><div><span>Peter Lowe</span><span>3,526 rules</span></div></div>
+      </div>
+      <div class="card card--lift feature">
+        <span class="icon-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/></svg></span>
+        <div><div class="h-card">Trackers</div><p>Prevent cross-site tracking and fingerprinting.</p></div>
+        <div class="feature-meter"><div class="bar"><span style="width:35%"></span></div><div><span>EasyPrivacy</span><span>42,556 rules</span></div></div>
+      </div>
+      <div class="card card--lift feature">
+        <span class="icon-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20v-8"/><path d="M12.656 7H14a4 4 0 0 1 4 4v1.344"/><path d="m14.12 3.88 1.88-1.88"/><path d="M17.123 17.123A6 6 0 0 1 6 14v-3a4 4 0 0 1 1.72-3.287"/><path d="m2 2 20 20"/><path d="M21 5a4 4 0 0 1-3.55 3.97"/><path d="M22 13h-3.344"/><path d="M3 21a4 4 0 0 1 3.81-4"/><path d="M3 5a4 4 0 0 0 3.55 3.97"/><path d="M6 13H2"/><path d="m8 2 1.88 1.88"/><path d="M9.712 4.06A3 3 0 0 1 15 6v1.13"/></svg></span>
+        <div><div class="h-card">Malware</div><p>Protection from known malicious domains.</p></div>
+        <div class="feature-meter"><div class="bar"><span style="width:2%"></span></div><div><span>URLhaus</span><span>451 rules</span></div></div>
+      </div>
+      <div class="card card--lift feature">
+        <span class="icon-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></span>
+        <div><div class="h-card">Adult content</div><p>Block adult and explicit content domains.</p></div>
+        <div class="feature-meter"><div class="bar"><span style="width:62%"></span></div><div><span>StevenBlack</span><span>76,678 rules</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ How it works ═══════════════════════════════════════════════════ -->
+<section class="section" id="how">
+  <div class="wrap">
+    <p class="eyebrow">How it works</p>
+    <h2 class="h-section">Most URLs never leave your phone.</h2>
+    <p class="intro">A request is checked in four stages. Only the rare potential match goes to the network — and it goes encrypted, through a relay that hides who asked.</p>
+    <div class="grid" style="margin-bottom:14px">
+      <div class="card step">
+        <div class="step-head"><span class="step-num step-num--lit">01</span><span class="step-rule step-rule--lit"></span></div>
+        <div><div class="h-step">Bloom filter, on device</div><p>A compact bit array instantly checks if a URL <em>might</em> be blocked. ~99.9% of URLs are cleared here with zero network traffic.</p></div>
+      </div>
+      <div class="card step">
+        <div class="step-head"><span class="step-num">02</span><span class="step-rule"></span></div>
+        <div><div class="h-step">Encrypted PIR query</div><p>For a possible match, the system sends a homomorphically encrypted query. The server answers it without ever decrypting it.</p></div>
+      </div>
+      <div class="card step">
+        <div class="step-head"><span class="step-num">03</span><span class="step-rule"></span></div>
+        <div><div class="h-step">Apple's OHTTP relay</div><p>Queries route through Apple's Oblivious HTTP relay. Your IP is hidden from our server; the query is hidden from Apple. Neither sees both.</p></div>
+      </div>
+      <div class="card step">
+        <div class="step-head"><span class="step-num">04</span><span class="step-rule"></span></div>
+        <div><div class="h-step">Block or allow</div><p>The encrypted response is decrypted on your device. The app never learns which URL was checked.</p></div>
+      </div>
+    </div>
+    <div class="grid grid--pair">
+      <div class="trace">
+        <div class="c">// the common case</div>
+        <div><span class="v">GET</span> apple.com/…</div>
+        <div><span class="c">└─</span> bloom filter <span class="c">··········</span> <span class="lit">miss</span> → allow</div>
+        <div class="c">&nbsp;&nbsp;&nbsp;0 bytes sent · 0 ms</div>
+      </div>
+      <div class="trace">
+        <div class="c">// a possible match</div>
+        <div><span class="v">GET</span> ads.example/track.js</div>
+        <div><span class="c">├─</span> bloom filter <span class="c">··········</span> hit</div>
+        <div><span class="c">├─</span> PIR query <span class="c">·············</span> encrypted, via OHTTP relay</div>
+        <div><span class="c">└─</span> verdict <span class="c">···············</span> <span class="lit">BLOCK</span> · decrypted on device</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Privacy ════════════════════════════════════════════════════════ -->
+<section class="section" id="privacy">
+  <div class="wrap">
+    <p class="eyebrow">Privacy</p>
+    <h2 class="h-section">Nobody sees both.</h2>
+    <p class="intro">This is not a policy promise — it is how the pieces are arranged. Each party in the chain holds one half of the picture and cannot get the other.</p>
+    <div class="grid grid--wide" style="margin-bottom:14px">
+      <div class="card actor">
+        <div class="actor-head"><span class="icon-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg></span><div class="h-step">Your device</div></div>
+        <dl>
+          <div><dt class="sees">SEES</dt><dd class="strong">The URL, the Bloom filter, the decryption key</dd></div>
+          <div><dt>NEVER</dt><dd>Sends anything home. There is no telemetry to send.</dd></div>
+        </dl>
+      </div>
+      <div class="card actor">
+        <div class="actor-head"><span class="icon-badge icon-badge--neutral"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10.586 5.414-5.172 5.172"/><path d="m18.586 13.414-5.172 5.172"/><path d="M6 12h12"/><circle cx="12" cy="20" r="2"/><circle cx="12" cy="4" r="2"/><circle cx="20" cy="12" r="2"/><circle cx="4" cy="12" r="2"/></svg></span><div class="h-step">Apple's relay</div></div>
+        <dl>
+          <div><dt class="sees">SEES</dt><dd class="strong">Your IP address and an opaque encrypted blob</dd></div>
+          <div><dt>NEVER</dt><dd>What is inside the query — Oblivious HTTP strips it of meaning.</dd></div>
+        </dl>
+      </div>
+      <div class="card actor">
+        <div class="actor-head"><span class="icon-badge icon-badge--neutral"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg></span><div class="h-step">Our PIR server</div></div>
+        <dl>
+          <div><dt class="sees">SEES</dt><dd class="strong">A homomorphically encrypted query it computes on blind</dd></div>
+          <div><dt>NEVER</dt><dd>Your IP, the URL, or the answer. Logs hold timestamps and sizes only.</dd></div>
+        </dl>
+      </div>
+    </div>
+    <div class="card telemetry">
+      <div>
+        <div class="h-step">Zero telemetry, by construction</div>
+        <p>Aggregate block counts live only on your device, are not backed up to iCloud, and are deleted with the app.</p>
+      </div>
+      <div class="telemetry-chips">
+        <span class="chip">no analytics SDKs</span>
+        <span class="chip">no crash reporters</span>
+        <span class="chip">no device IDs</span>
+        <span class="chip">no location</span>
+        <a class="chip chip--lit" href="privacy.html">read the policy<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Compared ═══════════════════════════════════════════════════════ -->
+<section class="section" id="compare">
+  <div class="wrap">
+    <p class="eyebrow">Compared</p>
+    <h2 class="h-section">System-wide, without a VPN.</h2>
+    <p class="intro" style="margin-bottom:32px">Other blockers route your traffic through a DNS resolver or a VPN you have to trust. Phosphor uses the iOS 26 URL-filter API, so nothing is rerouted and no one is trusted with your history.</p>
+
+    <div class="cmp-tabs" role="tablist" aria-label="Choose a product to compare against" data-cmp-tabs>
+      <button type="button" role="tab" data-comp="0" aria-selected="true">NextDNS</button>
+      <button type="button" role="tab" data-comp="1" aria-selected="false">AdGuard</button>
+      <button type="button" role="tab" data-comp="2" aria-selected="false">Lockdown</button>
+      <button type="button" role="tab" data-comp="3" aria-selected="false">1.1.1.1</button>
+    </div>
+
+    <div class="cmp" data-cmp data-comp="0">
+      <div class="cmp-row cmp-head"><span></span><span class="self">Phosphor</span><span>NextDNS</span><span>AdGuard Pro</span><span>Lockdown</span><span>1.1.1.1 + WARP</span></div>
+      <div class="cmp-row"><span class="label">System-wide filtering</span><span class="v-yes"><i class="dot"></i>Yes</span><span class="v-ok"><i class="dot"></i>Yes (DNS)</span><span class="v-ok"><i class="dot"></i>Yes (DNS/VPN)</span><span class="v-ok"><i class="dot"></i>Yes (VPN)</span><span class="v-part"><i class="dot"></i>Partial (DNS)</span></div>
+      <div class="cmp-row"><span class="label">No VPN required</span><span class="v-yes"><i class="dot"></i>Yes</span><span class="v-no"><i class="dot"></i>No*</span><span class="v-no"><i class="dot"></i>No</span><span class="v-no"><i class="dot"></i>No</span><span class="v-no"><i class="dot"></i>No</span></div>
+      <div class="cmp-row"><span class="label">Privacy model</span><span class="v-text self">PIR + HE</span><span class="v-text">Trust DNS</span><span class="v-text">Trust VPN</span><span class="v-text">On-device</span><span class="v-text">Trust Cloudflare</span></div>
+      <div class="cmp-row"><span class="label">App sees your URLs</span><span class="v-yes"><i class="dot"></i>Never</span><span class="v-no"><i class="dot"></i>Yes (DNS)</span><span class="v-no"><i class="dot"></i>Yes (VPN)</span><span class="v-ok"><i class="dot"></i>No</span><span class="v-no"><i class="dot"></i>Yes (DNS)</span></div>
+      <div class="cmp-row"><span class="label">Open source</span><span class="v-yes"><i class="dot"></i>Yes</span><span class="v-no"><i class="dot"></i>No</span><span class="v-part"><i class="dot"></i>Partial</span><span class="v-ok"><i class="dot"></i>Yes</span><span class="v-no"><i class="dot"></i>No</span></div>
+      <div class="cmp-row"><span class="label">Custom filter lists</span><span class="v-yes"><i class="dot"></i>Yes</span><span class="v-ok"><i class="dot"></i>Yes</span><span class="v-ok"><i class="dot"></i>Yes</span><span class="v-part"><i class="dot"></i>Limited</span><span class="v-no"><i class="dot"></i>No</span></div>
+      <div class="cmp-row"><span class="label">iOS 26 native API</span><span class="v-yes"><i class="dot"></i>Yes</span><span class="v-no"><i class="dot"></i>No</span><span class="v-no"><i class="dot"></i>No</span><span class="v-no"><i class="dot"></i>No</span><span class="v-no"><i class="dot"></i>No</span></div>
+    </div>
+    <p class="fine" style="margin:14px 0 0">* NextDNS can use DNS-over-HTTPS without a VPN profile, but this doesn't cover all app traffic.</p>
+  </div>
+</section>
+
+<!-- ═══ Pricing ════════════════════════════════════════════════════════ -->
+<section class="section" id="pricing">
+  <div class="wrap pricing-layout">
+    <div class="pricing-copy">
+      <p class="eyebrow">Pricing</p>
+      <h2 class="h-section">One plan. Seven days free.</h2>
+      <p class="intro">Filtering requires Phosphor Premium. The price funds the PIR server that answers encrypted queries — there are no ads or data to sell instead.</p>
+      <p style="font-size:15px;line-height:1.55;color:var(--ink-300);margin:0"><strong style="color:var(--ink-50);font-weight:600">Without a subscription</strong> you can still browse and manage filter lists, read the privacy documentation and complete onboarding.</p>
+    </div>
+
+    <div class="plan">
+      <div class="plan-head"><div class="h-card">Phosphor Premium</div><span class="plan-badge">7 days free</span></div>
+
+      <div class="plan-billing">
+        <input type="radio" name="billing" id="bill-monthly">
+        <input type="radio" name="billing" id="bill-yearly" checked>
+        <div class="seg" role="group" aria-label="Billing period">
+          <label for="bill-monthly">Monthly</label>
+          <label for="bill-yearly">Yearly<span class="save">−30%</span></label>
+        </div>
+        <div class="plan-monthly">
+          <div class="plan-price">$29.99<span> / month</span></div>
+          <p class="plan-note">Or $249.99 a year — about 30% less.</p>
+        </div>
+        <div class="plan-yearly">
+          <div class="plan-price">$249.99<span> / year</span></div>
+          <p class="plan-note">Works out to $20.83 a month, billed once a year.</p>
+        </div>
+      </div>
+
+      <ul>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#39ff7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Block ads &amp; trackers across all apps</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#39ff7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Malware &amp; adult content filtering</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#39ff7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Zero-knowledge privacy — encrypted PIR queries</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#39ff7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Custom filter lists &amp; manual entries</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#39ff7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Real-time blocking dashboard</li>
+      </ul>
+
+      <a class="btn btn-primary btn--block" href="https://apps.apple.com/app/phosphor">Start free trial</a>
+      <p class="plan-legal">Auto-renewing subscription billed by Apple. Renews unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in App Store settings. <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ════════════════════════════════════════════════════════════ -->
+<section class="section" id="faq">
+  <div class="wrap faq-layout">
+    <div class="faq-intro">
+      <p class="eyebrow">Support</p>
+      <h2>Questions</h2>
+      <p>Not answered here? Email <a href="mailto:support@phosphor.online">support@phosphor.online</a> or open an issue on <a href="https://github.com/victorantos/Phosphor/issues">GitHub</a>.</p>
+      <a href="support.html" style="display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600">Support page<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+    </div>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>How does Phosphor protect my privacy?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a847d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+        <p>Phosphor uses Apple's Private Information Retrieval (PIR) with homomorphic encryption. URLs are checked locally on your device. For potential matches, encrypted queries go through Apple's relay. Neither the app, our server, nor Apple can see which URLs you visit.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Why does the filter show as "Invalid" or "Not Active"?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a847d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+        <p>The URL filter requires Apple's OHTTP relay approval and a stable internet connection to our PIR server. If the filter shows as invalid, try: (1) Delete and reinstall the app, (2) Restart your device, (3) Check that you have an active subscription.</p>
+      </details>
+      <details class="faq-item">
+        <summary>How do I cancel my subscription?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a847d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+        <p>Go to Settings &gt; [Your Name] &gt; Subscriptions &gt; Phosphor &gt; Cancel Subscription. You'll continue to have access until the end of your billing period.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Does Phosphor work with all apps?<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a847d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+        <p>Phosphor filters URLs across Safari, in-app browsers (WebKit), and apps using URLSession. Some apps using custom networking stacks may not be filtered.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ Closer ═════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="wrap">
+    <div class="closer">
+      <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="38" cy="22" r="20" fill="#39ff7a" opacity=".07"/><circle cx="38" cy="22" r="15" fill="#39ff7a" opacity=".16"/><rect x="16" y="12" width="10" height="40" rx="5" fill="#f6f3ee"/><circle cx="38" cy="22" r="10" fill="#39ff7a"/></svg>
+      <h2>Read every line, then turn it on.</h2>
+      <p>The app, the filter extension and the shared Bloom filter are MIT-licensed on GitHub. The architecture and threat model are written down. Nothing is hidden behind a marketing page — including this one.</p>
+      <div class="closer-actions">
+        <a class="btn btn-primary btn--grow" href="https://apps.apple.com/app/phosphor">Download on the App Store</a>
+        <a class="btn btn-ghost btn--grow" href="https://github.com/victorantos/Phosphor">View source<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-brand">
+      <span class="wordmark"><svg width="22" height="22" viewBox="0 0 64 64" aria-hidden="true"><circle cx="38" cy="22" r="15" fill="#39ff7a" opacity=".16"/><rect x="16" y="12" width="10" height="40" rx="5" fill="#f6f3ee"/><circle cx="38" cy="22" r="10" fill="#39ff7a"/></svg><span>phosphor</span></span>
+      <p>Privacy-preserving, system-wide URL filtering for iOS 26. Built on Apple's NEURLFilterManager API.</p>
+    </div>
+    <nav class="footer-nav" aria-label="Footer">
+      <a href="#how">How it works</a>
+      <a href="privacy.html">Privacy policy</a>
+      <a href="#pricing">Pricing</a>
+      <a href="terms.html">Terms of service</a>
+      <a href="support.html">Support</a>
+      <a href="https://github.com/victorantos/Phosphor">GitHub</a>
+    </nav>
+    <div class="footer-legal">
+      <span>© 2026 Phosphor · MIT-licensed code, proprietary name and mark</span>
+      <span>support@phosphor.online</span>
+    </div>
+  </div>
+</footer>
+
+<div class="sticky-cta" data-sticky-cta hidden>
+  <div><b>7-day free trial</b><small>then $29.99/mo · cancel anytime</small></div>
+  <a class="btn btn-primary" href="https://apps.apple.com/app/phosphor">Get Phosphor</a>
+</div>
+
+<script src="site.js" defer></script>
+<script data-goatcounter="https://phosphor.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

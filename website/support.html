@@ -1,66 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Support — Phosphor</title>
-    <style>
-        :root { --accent: #39FF7A; --bg: #0a0a0a; --card: #1a1a1a; --text: #f0f0f0; --muted: #888; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
-        .container { max-width: 680px; margin: 0 auto; padding: 48px 24px; }
-        h1 { font-size: 2em; margin-bottom: 24px; }
-        h2 { font-size: 1.3em; margin: 32px 0 12px; color: var(--accent); }
-        p, li { color: var(--muted); margin-bottom: 12px; }
-        a { color: var(--accent); }
-        .card { background: var(--card); border-radius: 16px; padding: 24px; margin-bottom: 16px; }
-        .card h3 { margin-bottom: 8px; }
-        footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #222; text-align: center; color: var(--muted); font-size: 0.85em; }
-        footer a { margin: 0 12px; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support — Phosphor</title>
+<meta name="description" content="Help for Phosphor: email support, GitHub issues, and answers to the questions people ask most.">
+<meta name="theme-color" content="#0b0908">
+<link rel="canonical" href="https://phosphor.online/support.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://phosphor.online/support">
+<meta property="og:title" content="Support — Phosphor">
+<meta property="og:description" content="Email support, GitHub issues, and answers to the questions people ask most.">
+<meta property="og:image" content="https://phosphor.online/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Support</h1>
 
-        <div class="card">
-            <h3>Email Support</h3>
-            <p>For questions, issues, or feedback: <a href="mailto:support@phosphor.online">support@phosphor.online</a></p>
-        </div>
+<header class="site-header">
+  <div class="wrap">
+    <a class="wordmark" href="index.html">
+      <svg width="24" height="24" viewBox="0 0 64 64" aria-hidden="true"><circle cx="38" cy="22" r="15" fill="#39ff7a" opacity=".16"/><rect x="16" y="12" width="10" height="40" rx="5" fill="#f6f3ee"/><circle cx="38" cy="22" r="10" fill="#39ff7a"/></svg>
+      <span>phosphor</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="support.html" aria-current="page">Support</a>
+    </nav>
+  </div>
+</header>
 
-        <div class="card">
-            <h3>GitHub Issues</h3>
-            <p>Report bugs or request features: <a href="https://github.com/victorantos/Phosphor/issues">github.com/victorantos/Phosphor/issues</a></p>
-        </div>
+<main class="page">
+  <p class="eyebrow">Help</p>
+  <h1 class="h-page" style="margin-bottom:40px">Support</h1>
 
-        <h2>FAQ</h2>
+  <div class="contact-cards">
+    <a class="card card--lift" href="mailto:support@phosphor.online">
+      <span class="icon-badge"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg></span>
+      <span><span class="h-card" style="display:block">Email support</span><span style="display:block;font-size:15px;line-height:1.5;color:var(--ink-300);margin-top:6px">For questions, issues, or feedback:</span></span>
+      <span class="addr">support@phosphor.online</span>
+    </a>
+    <a class="card card--lift" href="https://github.com/victorantos/Phosphor/issues">
+      <span class="icon-badge icon-badge--neutral"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span>
+      <span><span class="h-card" style="display:block">GitHub issues</span><span style="display:block;font-size:15px;line-height:1.5;color:var(--ink-300);margin-top:6px">Report bugs or request features:</span></span>
+      <span class="addr">github.com/victorantos/Phosphor/issues</span>
+    </a>
+  </div>
 
-        <div class="card">
-            <h3>How does Phosphor protect my privacy?</h3>
-            <p>Phosphor uses Apple's Private Information Retrieval (PIR) with homomorphic encryption. URLs are checked locally on your device. For potential matches, encrypted queries go through Apple's relay. Neither the app, our server, nor Apple can see which URLs you visit.</p>
-        </div>
-
-        <div class="card">
-            <h3>Why does the filter show as "Invalid" or "Not Active"?</h3>
-            <p>The URL filter requires Apple's OHTTP relay approval and a stable internet connection to our PIR server. If the filter shows as invalid, try: (1) Delete and reinstall the app, (2) Restart your device, (3) Check that you have an active subscription.</p>
-        </div>
-
-        <div class="card">
-            <h3>How do I cancel my subscription?</h3>
-            <p>Go to Settings > [Your Name] > Subscriptions > Phosphor > Cancel Subscription. You'll continue to have access until the end of your billing period.</p>
-        </div>
-
-        <div class="card">
-            <h3>Does Phosphor work with all apps?</h3>
-            <p>Phosphor filters URLs across Safari, in-app browsers (WebKit), and apps using URLSession. Some apps using custom networking stacks may not be filtered.</p>
-        </div>
-
-        <footer>
-            <a href="/">Home</a>
-            <a href="/privacy">Privacy Policy</a>
-            <a href="/terms">Terms of Service</a>
-            <p style="margin-top: 12px;">&copy; 2026 Phosphor</p>
-        </footer>
+  <p class="eyebrow">FAQ</p>
+  <div>
+    <div class="qa">
+      <h3>How does Phosphor protect my privacy?</h3>
+      <p>Phosphor uses Apple's Private Information Retrieval (PIR) with homomorphic encryption. URLs are checked locally on your device. For potential matches, encrypted queries go through Apple's relay. Neither the app, our server, nor Apple can see which URLs you visit.</p>
     </div>
+    <div class="qa">
+      <h3>Why does the filter show as "Invalid" or "Not Active"?</h3>
+      <p>The URL filter requires Apple's OHTTP relay approval and a stable internet connection to our PIR server. If the filter shows as invalid, try: (1) Delete and reinstall the app, (2) Restart your device, (3) Check that you have an active subscription.</p>
+    </div>
+    <div class="qa">
+      <h3>How do I cancel my subscription?</h3>
+      <p>Go to Settings &gt; [Your Name] &gt; Subscriptions &gt; Phosphor &gt; Cancel Subscription. You'll continue to have access until the end of your billing period.</p>
+    </div>
+    <div class="qa">
+      <h3>Does Phosphor work with all apps?</h3>
+      <p>Phosphor filters URLs across Safari, in-app browsers (WebKit), and apps using URLSession. Some apps using custom networking stacks may not be filtered.</p>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer site-footer--slim">
+  <div class="wrap">
+    <nav aria-label="Footer">
+      <a href="index.html">Home</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+    </nav>
+    <span>© 2026 Phosphor</span>
+  </div>
+</footer>
+
+<script data-goatcounter="https://phosphor.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
