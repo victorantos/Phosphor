@@ -46,7 +46,10 @@ State as of 2026-09-29, end of day. URL filtering works on device for the first 
       (401 "No token key found"). Seen on 2026-09-30 after the database update: the
       filter went to `stopped` and iOS did not retry. The app now restarts a stopped
       filter when it is opened (`FilterRefresher.restartIfStopped`), not yet verified.
-      The real fix is for the server to keep its token key across restarts.
+      Server fixed on 2026-09-30: PIRService is patched with `--token-key-file`
+      (`build/server-scripts/pir-token-key.patch`) and keeps its key in
+      `/opt/phosphor/token-key.pem`. Verified that the key is unchanged across a restart.
+      Reapply the patch if the server is ever rebuilt from upstream.
 - [ ] Subdomains of listed sites are not blocked (`ad.doubleclick.net` loads although
       `doubleclick.net` is listed). Needs `NEURLFilterManager.urlParsingConfiguration`,
       which is in the iOS 27 SDK only. Install Xcode 27, then add it behind an
