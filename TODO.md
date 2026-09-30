@@ -5,6 +5,9 @@ State as of 2026-09-29, end of day. URL filtering works on device for the first 
 
 ## Where the code is
 
+- Server scripts and the live PIR probe test are kept in `build/server-scripts/`
+  (git-ignored) in the main working directory.
+
 - Branch `fix/url-filter` holds the filter fixes, on top of `main`.
 - The redesign (views, theme, website) is **uncommitted** in the main working directory,
   together with the same fixes written against the redesigned screens.
@@ -32,14 +35,17 @@ State as of 2026-09-29, end of day. URL filtering works on device for the first 
 
 ## Build
 
-- [ ] **Ads on ordinary sites are not blocked** (seen on bbc.co.uk). The ads list names
-      parent domains such as `doubleclick.net`, but iOS matches exact hostnames and ads
-      come from subdomains: `googleads.g.doubleclick.net`,
-      `securepubads.g.doubleclick.net`, `pagead2.googlesyndication.com`,
-      `tpc.googlesyndication.com` and `s0.2mdn.net` are all unlisted. Do both:
-      1. Add or switch to a list that names full hostnames (hosts format). Works on
-         iOS 26 and 27. The PIR database has to be reprocessed with the same entries.
-      2. Parent-domain matching on iOS 27, see the next item.
+- [ ] **Ads from subdomains**: a hostname-level list (StevenBlack unified hosts) is now
+      bundled, entries are normalised to the form iOS looks up (no leading `www.`), and
+      the server database was rebuilt to match on 2026-09-30 (159,417 keywords). The
+      server answers correctly. Still to confirm on a phone: the verdict probe denies
+      `googleads.g.doubleclick.net`, and bbc.co.uk shows fewer ads in a reopened Safari.
+- [ ] **After the PIR server restarts, the filter can stop and stay stopped.** The server
+      creates new token keys on every start, so tokens a phone already holds are refused
+      (401 "No token key found"). Seen on 2026-09-30 after the database update: the
+      filter went to `stopped` and iOS did not retry. The app now restarts a stopped
+      filter when it is opened (`FilterRefresher.restartIfStopped`), not yet verified.
+      The real fix is for the server to keep its token key across restarts.
 - [ ] Subdomains of listed sites are not blocked (`ad.doubleclick.net` loads although
       `doubleclick.net` is listed). Needs `NEURLFilterManager.urlParsingConfiguration`,
       which is in the iOS 27 SDK only. Install Xcode 27, then add it behind an

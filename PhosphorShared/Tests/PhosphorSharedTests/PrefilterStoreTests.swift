@@ -14,7 +14,7 @@ private func makeContainer() throws -> URL {
 
     let lists = FilterListStore(containerURL: container)
     var enabled = FilterList(name: "Ads", category: .ads, source: .bundled, isEnabled: true)
-    try lists.saveRules([FilterRule(url: "ads.example.com")], for: &enabled)
+    try lists.saveRules([FilterRule(url: "ads.example.com"), FilterRule(url: "www.ads.example.com")], for: &enabled)
     var disabled = FilterList(name: "Off", category: .trackers, source: .bundled, isEnabled: false)
     try lists.saveRules([FilterRule(url: "off.example.com")], for: &disabled)
 
@@ -25,14 +25,15 @@ private func makeContainer() throws -> URL {
     let data = try store.loadData()
     #expect(data.count == (metadata.bitCount + 7) / 8)
 
-    // Rebuilding the same filter from the saved parameters finds the enabled rule only.
+    // The filter holds the enabled rule and Apple's test URL, each once and without `www.`.
     let expected = BloomFilter.build(
-        urls: ["ads.example.com", "www.apple.com/url-filter-test", "apple.com/url-filter-test"],
+        urls: ["ads.example.com", "apple.com/url-filter-test"],
         falsePositiveRate: 0.001)
     #expect(expected.data == data)
     #expect(expected.tag == metadata.tag)
+    #expect(metadata.urlCount == 2)
     #expect(expected.mightContain("ads.example.com"))
-    #expect(expected.mightContain("www.apple.com/url-filter-test"))
+    #expect(expected.mightContain("apple.com/url-filter-test"))
 }
 
 @Test func prefilterRebuildRemovesFilterWhenNothingIsEnabled() throws {
@@ -57,4 +58,15 @@ private func makeContainer() throws -> URL {
     defer { try? FileManager.default.removeItem(at: container) }
 
     #expect(try PrefilterStore(containerURL: container).loadMetadata() == nil)
+}
+
+@Test func prefilterEntriesAreNormalizedToWhatTheSystemLooksUp() {
+    let urls = ["www.Example.com", "example.com", "cdn.example.com", "www.example.com/path", "wwwx.example.com"]
+
+    #expect(PrefilterStore.normalized(urls) == [
+        "cdn.example.com",
+        "example.com",
+        "example.com/path",
+        "wwwx.example.com",
+    ])
 }

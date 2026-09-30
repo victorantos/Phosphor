@@ -22,6 +22,7 @@ enum FilterRefresher {
             try? await Task.sleep(for: .seconds(1))
             guard !Task.isCancelled else { return }
             await apply()
+            pending = nil
         }
     }
 
@@ -37,6 +38,27 @@ enum FilterRefresher {
         guard tag != previousTag else { return }
         guard !FilterPause.isActive else { return }
 
+        await restart(reason: "to load the new prefilter")
+    }
+
+    /// Starts the filter again if it is switched on but has stopped. The system gives
+    /// up after repeated failures, for example while the PIR server is unreachable, and
+    /// does not try again by itself. Call when the app becomes active.
+    static func restartIfStopped() async {
+        guard !FilterPause.isActive, pending == nil else { return }
+        let manager = NEURLFilterManager.shared
+        guard (try? await manager.loadFromPreferences()) != nil, manager.isEnabled else { return }
+
+        // The status reads as invalid for a moment after loading, so let it settle.
+        try? await Task.sleep(for: .seconds(2))
+        guard await manager.status == .stopped else { return }
+
+        let background = UIApplication.shared.beginBackgroundTask(withName: "Restart URL filter")
+        defer { UIApplication.shared.endBackgroundTask(background) }
+        await restart(reason: "because it had stopped")
+    }
+
+    private static func restart(reason: String) async {
         do {
             let manager = NEURLFilterManager.shared
             try await manager.loadFromPreferences()
@@ -58,7 +80,7 @@ enum FilterRefresher {
             try await manager.loadFromPreferences()
             manager.isEnabled = true
             try await manager.saveToPreferences()
-            logger.info("Restarted the filter to load the new prefilter, was \(String(describing: status), privacy: .public)")
+            logger.info("Restarted the filter \(reason, privacy: .public)")
         } catch {
             logger.error("Restarting the filter failed: \(error.localizedDescription, privacy: .public)")
         }

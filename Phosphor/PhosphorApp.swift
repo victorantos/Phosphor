@@ -43,6 +43,7 @@ struct PhosphorApp: App {
                 guard phase == .active else { return }
                 Task {
                     await FilterPause.reconcile()
+                    await FilterRefresher.restartIfStopped()
                     await skipOnboardingIfFilterIsRunning()
                     await FilterProbe.runIfRequested()
                 }
@@ -68,7 +69,8 @@ struct PhosphorApp: App {
         guard !loader.hasImported else { return }
         Task.detached(priority: .utility) {
             try? loader.importIfNeeded()
-            try? PrefilterStore().rebuild(from: store)
+            // An update can bring new lists; make the running filter pick them up.
+            await FilterRefresher.listsChanged()
         }
     }
 }

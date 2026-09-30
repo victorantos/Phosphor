@@ -42,6 +42,18 @@ public final class PrefilterStore: Sendable {
         containerURL.appendingPathComponent(Self.metadataFilename)
     }
 
+    /// The form the system looks a URL up in: it drops a leading `www.` before checking
+    /// the prefilter, so an entry that keeps it can never match. Duplicates are removed
+    /// and the result is sorted, which keeps the filter's tag stable.
+    public static func normalized(_ urls: [String]) -> [String] {
+        var seen = Set<String>()
+        for url in urls {
+            let lowered = url.lowercased()
+            seen.insert(lowered.hasPrefix("www.") ? String(lowered.dropFirst(4)) : lowered)
+        }
+        return seen.sorted()
+    }
+
     // MARK: - Building (app only)
 
     /// Build the filter from the enabled block rules and save it.
@@ -57,6 +69,7 @@ public final class PrefilterStore: Sendable {
         }
 
         urls.append(contentsOf: Self.onboardingTestEntries)
+        urls = Self.normalized(urls)
         let filter = BloomFilter.build(urls: urls, falsePositiveRate: Self.falsePositiveRate)
         let metadata = PrefilterMetadata(
             tag: filter.tag,

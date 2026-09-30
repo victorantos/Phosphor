@@ -7,6 +7,13 @@
     "description": "A well-maintained list of known ad-serving domains."
   },
   {
+    "name": "StevenBlack Unified Hosts",
+    "category": "ads",
+    "filename": "ads-hosts.json",
+    "sourceURL": "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts",
+    "description": "Ad, tracker and malware hosts named in full, including the subdomains ads are served from."
+  },
+  {
     "name": "EasyPrivacy Domains",
     "category": "trackers",
     "filename": "trackers.json",

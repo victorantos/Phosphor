@@ -23,6 +23,9 @@ mkdir -p "$OUTPUT_DIR"
 # --- Sources ---
 # Ads: Peter Lowe's ad servers list (~3,000 domains)
 ADS_URL="https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext"
+# Ads, full hostnames: StevenBlack's unified hosts (~75,000 hosts). iOS matches exact
+# hostnames, and ads are served from subdomains that a domain-level list does not name.
+ADS_HOSTS_URL="https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts"
 # Trackers: EasyPrivacy domains from Firebog (~500 domains)
 TRACKERS_URL="https://v.firebog.net/hosts/Easyprivacy.txt"
 # Malware: URLhaus abuse.ch active threats (curated, ~2-5K domains)
@@ -86,6 +89,13 @@ domains_to_json "$TEMP_DIR/ads_domains.txt" "$OUTPUT_DIR/ads.json"
 ADS_COUNT=$(wc -l < "$TEMP_DIR/ads_domains.txt" | tr -d ' ')
 echo "    $ADS_COUNT domains"
 
+echo "==> Downloading Ads hosts list (StevenBlack unified)..."
+curl -sL "$ADS_HOSTS_URL" -o "$TEMP_DIR/ads_hosts_raw.txt"
+parse_hosts "$TEMP_DIR/ads_hosts_raw.txt" | grep -E '^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}$' > "$TEMP_DIR/ads_hosts_domains.txt"
+domains_to_json "$TEMP_DIR/ads_hosts_domains.txt" "$OUTPUT_DIR/ads-hosts.json"
+ADS_HOSTS_COUNT=$(wc -l < "$TEMP_DIR/ads_hosts_domains.txt" | tr -d ' ')
+echo "    $ADS_HOSTS_COUNT hosts"
+
 echo "==> Downloading Trackers list (EasyPrivacy domains)..."
 curl -sL "$TRACKERS_URL" -o "$TEMP_DIR/trackers_raw.txt"
 parse_domains "$TEMP_DIR/trackers_raw.txt" > "$TEMP_DIR/trackers_domains.txt"
@@ -110,7 +120,11 @@ echo "    $ADULT_COUNT domains"
 echo ""
 echo "==> Done. Bundled lists saved to $OUTPUT_DIR/"
 echo "    Ads:            $ADS_COUNT domains"
+echo "    Ads hosts:      $ADS_HOSTS_COUNT hosts"
 echo "    Trackers:       $TRACKERS_COUNT domains"
 echo "    Malware:        $MALWARE_COUNT domains"
 echo "    Adult Content:  $ADULT_COUNT domains"
-echo "    Total:          $(( ADS_COUNT + TRACKERS_COUNT + MALWARE_COUNT + ADULT_COUNT )) domains"
+echo "    Total:          $(( ADS_COUNT + ADS_HOSTS_COUNT + TRACKERS_COUNT + MALWARE_COUNT + ADULT_COUNT )) domains"
+echo ""
+echo "==> The PIR database must list the same entries. Rebuild it with:"
+echo "    ./Tools/build-pir-database.py"

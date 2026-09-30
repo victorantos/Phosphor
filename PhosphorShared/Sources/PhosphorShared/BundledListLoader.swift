@@ -14,7 +14,7 @@ struct BundledListManifestEntry: Codable, Sendable {
 /// on first launch. Subsequent launches skip import unless a version bump occurs.
 public final class BundledListLoader: Sendable {
     /// Increment this when bundled lists are updated to trigger a re-import.
-    public static let bundledListVersion = 2
+    public static let bundledListVersion = 3
 
     private static let versionKey = "bundledListVersion"
     private let store: FilterListStore
@@ -38,9 +38,8 @@ public final class BundledListLoader: Sendable {
             return
         }
         let stored = PhosphorConstants.sharedDefaults?.integer(forKey: Self.versionKey) ?? 0
-        if stored == 0 {
-            try importBundledLists(from: bundle)
-        } else {
+        try importBundledLists(from: bundle)
+        if stored == 1 {
             try enableAllBundledLists()
         }
         PhosphorConstants.sharedDefaults?.set(Self.bundledListVersion, forKey: Self.versionKey)
@@ -83,8 +82,11 @@ public final class BundledListLoader: Sendable {
         let entries = try JSONDecoder().decode([BundledListManifestEntry].self, from: data)
 
         var lists: [FilterList] = []
+        // A later version of the bundle can add lists. Lists already imported are left
+        // alone so that switching one off survives an update.
+        let existingNames = Set((try? store.loadLists())?.map(\.name) ?? [])
 
-        for entry in entries {
+        for entry in entries where !existingNames.contains(entry.name) {
             let resourceName = (entry.filename as NSString).deletingPathExtension
             let resourceExt = (entry.filename as NSString).pathExtension
 
