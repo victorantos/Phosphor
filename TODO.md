@@ -38,8 +38,9 @@ State as of 2026-09-29, end of day. URL filtering works on device for the first 
 - [ ] **Ads from subdomains**: a hostname-level list (StevenBlack unified hosts) is now
       bundled, entries are normalised to the form iOS looks up (no leading `www.`), and
       the server database was rebuilt to match on 2026-09-30 (159,417 keywords). The
-      server answers correctly. Still to confirm on a phone: the verdict probe denies
-      `googleads.g.doubleclick.net`, and bbc.co.uk shows fewer ads in a reopened Safari.
+      server answers correctly, and on 2026-09-30 the verdict probe on the iPhone 15
+      (iOS 27.0) denied all six Google ad hostnames tested. Still to confirm: bbc.co.uk
+      shows fewer ads in a reopened Safari.
 - [ ] **After the PIR server restarts, the filter can stop and stay stopped.** The server
       creates new token keys on every start, so tokens a phone already holds are refused
       (401 "No token key found"). Seen on 2026-09-30 after the database update: the
