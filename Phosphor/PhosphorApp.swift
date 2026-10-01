@@ -61,11 +61,18 @@ struct PhosphorApp: App {
     private func skipOnboardingIfFilterIsRunning() async {
         guard !hasCompletedOnboarding else { return }
         let manager = NEURLFilterManager.shared
-        guard (try? await manager.loadFromPreferences()) != nil,
-              manager.isEnabled,
-              await manager.status == .running
-        else { return }
-        hasCompletedOnboarding = true
+        guard (try? await manager.loadFromPreferences()) != nil, manager.isEnabled else { return }
+        // The status reads as invalid for a moment after loading, so let it settle.
+        // `starting` counts: a filter that is starting again, for example after an
+        // update, has been set up all the same.
+        for _ in 0..<6 {
+            let status = await manager.status
+            if status == .running || status == .starting {
+                hasCompletedOnboarding = true
+                return
+            }
+            try? await Task.sleep(for: .milliseconds(500))
+        }
     }
 
     private func importBundledListsIfNeeded() {

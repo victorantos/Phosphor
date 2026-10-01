@@ -13,6 +13,11 @@ import UIKit
 enum FilterRefresher {
     private static let logger = Logger(subsystem: "com.nestclaw.phosphor", category: "FilterRefresher")
     private static var pending: Task<Void, Never>?
+    private static let lastRestartKey = "lastStoppedFilterRestart"
+
+    /// A restarted filter takes several minutes to fetch tokens and reach `running`, and
+    /// reads `stopped` between attempts. Restarting again in that time starts it over.
+    private static let restartCooldown: TimeInterval = 10 * 60
 
     /// Call after the lists or their rules change. Changes made in quick succession,
     /// such as switching several lists, lead to a single restart.
@@ -52,6 +57,13 @@ enum FilterRefresher {
         // The status reads as invalid for a moment after loading, so let it settle.
         try? await Task.sleep(for: .seconds(2))
         guard await manager.status == .stopped else { return }
+
+        let defaults = UserDefaults.standard
+        if let last = defaults.object(forKey: lastRestartKey) as? Date,
+           Date.now.timeIntervalSince(last) < restartCooldown {
+            return
+        }
+        defaults.set(Date.now, forKey: lastRestartKey)
 
         let background = UIApplication.shared.beginBackgroundTask(withName: "Restart URL filter")
         defer { UIApplication.shared.endBackgroundTask(background) }
