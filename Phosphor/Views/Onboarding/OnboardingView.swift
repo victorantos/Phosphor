@@ -2,7 +2,12 @@ import SwiftUI
 
 struct OnboardingView: View {
     @Binding var hasCompletedOnboarding: Bool
-    @State private var currentPage = 0
+    @State private var currentPage: Int
+
+    init(hasCompletedOnboarding: Binding<Bool>, initialPage: Int = 0) {
+        _hasCompletedOnboarding = hasCompletedOnboarding
+        _currentPage = State(initialValue: initialPage)
+    }
 
     var body: some View {
         TabView(selection: $currentPage) {

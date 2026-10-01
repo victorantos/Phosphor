@@ -7,7 +7,11 @@ enum PhosphorTab: Hashable {
 }
 
 struct ContentView: View {
-    @State private var selection: PhosphorTab = .dashboard
+    @State private var selection: PhosphorTab
+
+    init(initialTab: PhosphorTab = .dashboard) {
+        _selection = State(initialValue: initialTab)
+    }
 
     var body: some View {
         TabView(selection: $selection) {

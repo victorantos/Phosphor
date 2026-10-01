@@ -18,7 +18,9 @@ struct PhosphorApp: App {
     var body: some Scene {
         WindowGroup {
             Group {
-                if !hasCompletedOnboarding {
+                if let screen = ScreenshotMode.screen {
+                    screenshotView(screen)
+                } else if !hasCompletedOnboarding {
                     OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
                 } else {
                     ContentView()
@@ -61,6 +63,18 @@ struct PhosphorApp: App {
         }
         .backgroundTask(.appRefresh(SubscriptionGate.refreshTaskID)) {
             await SubscriptionGate.run()
+        }
+    }
+
+    @ViewBuilder
+    private func screenshotView(_ screen: String) -> some View {
+        switch screen {
+        case "welcome": OnboardingView(hasCompletedOnboarding: .constant(false), initialPage: 0)
+        case "privacy": OnboardingView(hasCompletedOnboarding: .constant(false), initialPage: 1)
+        case "setup": OnboardingView(hasCompletedOnboarding: .constant(false), initialPage: 2)
+        case "lists": ContentView(initialTab: .lists)
+        case "settings": ContentView(initialTab: .settings)
+        default: ContentView(initialTab: .dashboard)
         }
     }
 

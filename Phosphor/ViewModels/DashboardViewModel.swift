@@ -44,6 +44,11 @@ final class DashboardViewModel {
     }
 
     func loadFilterStatus() async {
+        if ScreenshotMode.isActive {
+            filterIsEnabled = true
+            filterStatus = "Running"
+            return
+        }
         do {
             let manager = NEURLFilterManager.shared
             try await manager.loadFromPreferences()
@@ -62,6 +67,7 @@ final class DashboardViewModel {
     /// Keeps the status current while the dashboard is on screen. The filter can
     /// take a while to go from starting to running, so one read at load is not enough.
     func observeFilterStatus() async {
+        if ScreenshotMode.isActive { return }
         for await status in NEURLFilterManager.shared.handleStatusChange() {
             apply(status)
             filterIsEnabled = NEURLFilterManager.shared.isEnabled

@@ -60,6 +60,7 @@ final class SettingsViewModel {
     }
 
     func loadFilterStatus() async {
+        if ScreenshotMode.isActive { filterIsRunning = true; return }
         let manager = NEURLFilterManager.shared
         do {
             try await manager.loadFromPreferences()
@@ -71,6 +72,7 @@ final class SettingsViewModel {
     }
 
     func observeFilterStatus() async {
+        if ScreenshotMode.isActive { return }
         let manager = NEURLFilterManager.shared
         for await status in manager.handleStatusChange() {
             filterIsRunning = manager.isEnabled && status == .running

@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root { --ink950:#0B0908; --ink50:#F6F3EE; --phosphor:#39FF7A; --line:rgba(246,243,238,.14); }
+  html, body { margin:0; width:1242px; height:2688px; background:var(--ink950); overflow:hidden; }
+  body {
+    font-family: -apple-system, "SF Pro Display", system-ui, sans-serif;
+    background:
+      radial-gradient(900px 900px at 50% 0%, rgba(57,255,122,.18), transparent 70%),
+      var(--ink950);
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .eyebrow {
+    margin-top:150px; font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size:34px; letter-spacing:.14em; text-transform:uppercase; color:var(--phosphor);
+  }
+  h1 {
+    margin:34px 60px 0; text-align:center; font-size:104px; line-height:1.08;
+    font-weight:700; letter-spacing:-.035em; color:var(--ink50);
+  }
+  h1 .lit { color:var(--phosphor); display:block; }
+  .phone {
+    margin-top:96px; width:900px; height:1956px; border-radius:120px; padding:22px;
+    background:#151210; border:3px solid var(--line); box-sizing:border-box;
+    box-shadow: 0 40px 120px rgba(0,0,0,.6), 0 0 160px rgba(57,255,122,.10);
+  }
+  .phone img { width:100%; height:100%; border-radius:100px; display:block; object-fit:cover; }
+  /* iPad 13" canvas: 2064x2752 */
+  body.ipad { width:2064px; height:2752px; }
+  html:has(body.ipad) { width:2064px; height:2752px; }
+  body.ipad .eyebrow { margin-top:170px; font-size:44px; }
+  body.ipad h1 { font-size:128px; margin-top:40px; }
+  body.ipad .phone { margin-top:110px; width:1560px; height:2080px; border-radius:80px; padding:30px; }
+  body.ipad .phone img { border-radius:52px; }
+</style>
+</head>
+<body>
+  <div class="eyebrow" id="eyebrow"></div>
+  <h1><span id="line1"></span><span class="lit" id="line2"></span></h1>
+  <div class="phone"><img id="shot" alt=""></div>
+<script>
+  const shots = {
+    welcome:  ["Ad blocking for iOS 26", "Every app.", "Not just Safari."],
+    setup:    ["Apple Private Information Retrieval", "Encrypted lookups.", "Even from us."],
+    lists:    ["159,000+ domains, updated daily", "Five lists built in.", "Add your own."],
+    settings: ["No VPN · No account · No telemetry", "Pause with one tap.", "Choose what to block."],
+  };
+  const params = new URLSearchParams(location.search);
+  const key = params.get("shot") || "welcome";
+  const ipad = params.get("device") === "ipad";
+  if (ipad) document.body.classList.add("ipad");
+  const [eyebrow, l1, l2] = shots[key];
+  document.getElementById("eyebrow").textContent = eyebrow;
+  document.getElementById("line1").textContent = l1;
+  document.getElementById("line2").textContent = l2;
+  document.getElementById("shot").src = "raw/" + (ipad ? "ipad-" : "") + key + ".png";
+</script>
+</body>
+</html>
