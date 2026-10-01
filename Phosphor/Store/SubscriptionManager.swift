@@ -50,7 +50,7 @@ final class SubscriptionManager {
         do {
             products = try await Product.products(for: Self.productIDs)
                 .sorted { $0.price < $1.price }
-            Self.logger.notice("Loaded \(self.products.count) products")
+            Self.logger.notice("Loaded \(self.products.count) products: \(self.products.map { "\($0.id) \($0.displayPrice)" }.joined(separator: ", "), privacy: .public)")
             await updateSubscriptionStatus()
         } catch {
             Self.logger.error("Failed to load products: \(error.localizedDescription)")

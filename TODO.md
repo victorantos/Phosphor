@@ -185,6 +185,11 @@ it is the default), monthly $1.99, 7-day free trial on both, no lifetime plan.
 - [x] Build 1.0 (4) archived and uploaded 2026-10-01 (FilterProbe and the debug
       override are compiled out of release builds; checked in the archive). Next:
       TestFlight on a phone to see whether the filter starts through the relay.
+- [ ] TestFlight build 4 (2026-10-01): the paywall spun forever. The sandbox returned
+      only Monthly, at the old $29.99, and no Yearly, about an hour after the App Store
+      Connect price and offer changes (debug build on the iPhone 11 logged "Loaded 1
+      products: com.nestclaw.phosphor.monthly $29.99"). Apple-side propagation; wait and
+      recheck. Build 5 shows whichever plans load and a retry state when none do.
 - [ ] Resubmit with a note for App Review that
       Safari has to be reopened after a list is changed. Not needed after first setup:
       on a clean install Safari blocked at once without being reopened (2026-10-01).
