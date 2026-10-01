@@ -1,9 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "·" : {
-
-    },
     "%@ active list%@" : {
       "localizations" : {
         "en" : {
@@ -51,7 +48,13 @@
     "Changes apply to an app the next time it is opened. Close Safari and open it again to see them there." : {
 
     },
+    "Check that you are online, then restart the filter. If it still doesn't start, restarting the phone usually helps." : {
+
+    },
     "Each party in the chain holds one half of the picture and cannot get the other. This is arrangement, not policy." : {
+
+    },
+    "iOS is getting the encrypted access it needs to check sites without anyone seeing them. You can leave the app; this carries on in the background. Sites load normally until it's ready." : {
 
     },
     "Lists" : {
@@ -90,6 +93,9 @@
     "Refresh the list to download rules." : {
 
     },
+    "Restart filter" : {
+
+    },
     "Rules" : {
 
     },
@@ -105,6 +111,9 @@
     "System-wide filtering for iOS 26 that keeps the URLs you visit encrypted — even from us." : {
 
     },
+    "Taking longer than usual?" : {
+
+    },
     "The app, the filter extension and the shared Bloom filter are MIT-licensed — free to use, modify and distribute. The Phosphor name and mark are proprietary." : {
 
     },
@@ -118,6 +127,9 @@
 
     },
     "Turn filtering on. Keep your history yours." : {
+
+    },
+    "Turning on protection" : {
 
     },
     "Version %@ (%@)" : {
