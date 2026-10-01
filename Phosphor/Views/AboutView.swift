@@ -81,7 +81,7 @@ struct AboutView: View {
             SectionLabel("How it works")
 
             VStack(spacing: 10) {
-                Step(1, "Bloom filter, on device", "A compact bit array instantly checks if a URL might be blocked. ~99.9% of URLs are cleared here with zero network traffic.", lit: true)
+                Step(1, "Bloom filter, on device", "A compact bit array instantly checks if a URL might be blocked. Most URLs are cleared here with zero network traffic.", lit: true)
                 Step(2, "Encrypted PIR query", "For a possible match, the system sends a homomorphically encrypted query. The server answers it without ever decrypting it.")
                 Step(3, "Apple's OHTTP relay", "Queries route through Apple's Oblivious HTTP relay. Your IP is hidden from our server; the query is hidden from Apple.")
                 Step(4, "Block or allow", "The encrypted response is decrypted on your device. The app never learns which URL was checked.")

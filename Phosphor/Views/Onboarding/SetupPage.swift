@@ -105,7 +105,7 @@ struct SetupPage: View {
         PhosphorGroup {
             grantRow(
                 title: "Checks URLs against your lists",
-                detail: "Locally, using a Bloom filter. ~99.9% never leave the phone.",
+                detail: "Locally, using a Bloom filter. Most URLs never leave the phone.",
                 lit: true
             )
             PhosphorDivider(inset: 16)

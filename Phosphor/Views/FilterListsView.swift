@@ -6,9 +6,11 @@ struct FilterListsView: View {
     @State private var showingAddSheet = false
     @State private var showingAddEntry = false
 
-    private var builtIn: [FilterList] { viewModel.lists.filter { $0.source == .bundled } }
+    private var builtIn: [FilterList] { viewModel.lists.filter(\.isBuiltIn) }
     private var custom: [FilterList] {
-        viewModel.lists.filter { if case .remote = $0.source { return true } else { return false } }
+        viewModel.lists.filter { list in
+            if case .remote = list.source { return !list.isBuiltIn } else { return false }
+        }
     }
     private var manual: [FilterList] { viewModel.lists.filter { $0.source == .manual } }
 
@@ -273,7 +275,7 @@ private struct FilterListRow: View {
 
     private var subtitle: String {
         var parts = [list.category.displayName, "\(list.ruleCount.formatted()) rules"]
-        if case .remote = list.source { parts.append("Remote") }
+        if case .remote = list.source, !list.isBuiltIn { parts.append("Remote") }
         return parts.joined(separator: " · ")
     }
 }
@@ -281,4 +283,14 @@ private struct FilterListRow: View {
 #Preview {
     FilterListsView()
         .preferredColorScheme(.dark)
+}
+
+/// Lists that ship with the app. Those that update from the web are stored with a remote
+/// source, so they are recognised by name against the bundled manifest.
+private let bundledListNames = BundledListLoader.bundledListNames()
+
+private extension FilterList {
+    var isBuiltIn: Bool {
+        source == .bundled || (source != .manual && bundledListNames.contains(name))
+    }
 }

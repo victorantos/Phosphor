@@ -24,6 +24,17 @@ public final class BundledListLoader: Sendable {
         self.store = store
     }
 
+    /// Names of the lists that ship with the app. Bundled lists that update from the web
+    /// are stored with a remote source, so the source alone does not identify them.
+    public static func bundledListNames(in bundle: Bundle = .main) -> Set<String> {
+        guard let url = bundle.url(forResource: "bundled-lists", withExtension: "json", subdirectory: "BundledLists")
+                ?? bundle.url(forResource: "bundled-lists", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let entries = try? JSONDecoder().decode([BundledListManifestEntry].self, from: data)
+        else { return [] }
+        return Set(entries.map(\.name))
+    }
+
     /// Returns true if bundled lists have already been imported at the current version.
     public var hasImported: Bool {
         let stored = PhosphorConstants.sharedDefaults?.integer(forKey: Self.versionKey) ?? 0
