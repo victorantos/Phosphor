@@ -1,95 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terms of Service — Phosphor</title>
-    <style>
-        :root { --accent: #39FF7A; --bg: #0a0a0a; --card: #1a1a1a; --text: #f0f0f0; --muted: #888; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
-        .container { max-width: 680px; margin: 0 auto; padding: 48px 24px; }
-        h1 { font-size: 2em; margin-bottom: 8px; }
-        h2 { font-size: 1.3em; margin: 32px 0 12px; color: var(--accent); }
-        p, li { color: var(--muted); margin-bottom: 12px; }
-        ul { padding-left: 20px; }
-        .updated { color: var(--muted); font-size: 0.9em; margin-bottom: 32px; }
-        a { color: var(--accent); }
-        footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #222; text-align: center; color: var(--muted); font-size: 0.85em; }
-        footer a { margin: 0 12px; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terms of Service — Phosphor</title>
+<meta name="description" content="The terms that govern your use of Phosphor, including subscription, free features, service availability and acceptable use.">
+<meta name="theme-color" content="#0b0908">
+<link rel="canonical" href="https://phosphor.online/terms.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://phosphor.online/terms">
+<meta property="og:title" content="Terms of Service — Phosphor">
+<meta property="og:description" content="The terms that govern your use of Phosphor, including subscription, free features and acceptable use.">
+<meta property="og:image" content="https://phosphor.online/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Terms of Service</h1>
-        <p class="updated">Last updated: April 10, 2026</p>
 
-        <p>These Terms of Service ("Terms") govern your use of the Phosphor application ("the app") and related services. By downloading, installing, or using Phosphor, you agree to these Terms.</p>
+<header class="site-header">
+  <div class="wrap">
+    <a class="wordmark" href="index.html">
+      <svg width="24" height="24" viewBox="0 0 64 64" aria-hidden="true"><circle cx="38" cy="22" r="15" fill="#39ff7a" opacity=".16"/><rect x="16" y="12" width="10" height="40" rx="5" fill="#f6f3ee"/><circle cx="38" cy="22" r="10" fill="#39ff7a"/></svg>
+      <span>phosphor</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html" aria-current="page">Terms</a>
+      <a href="support.html">Support</a>
+    </nav>
+  </div>
+</header>
 
-        <h2>1. Service Description</h2>
-        <p>Phosphor provides system-wide URL filtering for iOS using Apple's NEURLFilterManager API. The service filters URLs across Safari and other apps to block ads, trackers, malware, and unwanted content using on-device Bloom filters and encrypted Private Information Retrieval (PIR) queries.</p>
+<main class="page">
+  <p class="eyebrow">Legal</p>
+  <h1 class="h-page" style="margin-bottom:14px">Terms of Service</h1>
+  <p class="page-date">Last updated: April 10, 2026</p>
+  <p class="page-lede" style="margin-bottom:48px">These Terms of Service ("Terms") govern your use of the Phosphor application ("the app") and related services. By downloading, installing, or using Phosphor, you agree to these Terms.</p>
 
-        <h2>2. Subscription</h2>
-        <ul>
-            <li>Phosphor requires an active subscription to enable URL filtering.</li>
-            <li>Subscriptions are available on a monthly ($29.99/month) or yearly ($249.99/year) basis.</li>
-            <li>New subscribers receive a <strong>7-day free trial</strong>. You will not be charged during the trial period.</li>
-            <li>Subscriptions <strong>automatically renew</strong> at the end of each billing period unless cancelled at least 24 hours before the renewal date.</li>
-            <li>Payment is charged to your Apple ID account at confirmation of purchase.</li>
-            <li>You can manage or cancel your subscription in <strong>Settings &gt; [Your Name] &gt; Subscriptions</strong> on your device.</li>
-        </ul>
+  <div class="clause"><span class="n">01</span><div>
+    <h2>Service Description</h2>
+    <p>Phosphor provides system-wide URL filtering for iOS using Apple's NEURLFilterManager API. The service filters URLs across Safari and other apps to block ads, trackers, malware, and unwanted content using on-device Bloom filters and encrypted Private Information Retrieval (PIR) queries.</p>
+  </div></div>
 
-        <h2>3. Free Features</h2>
-        <p>Without a subscription, you can:</p>
-        <ul>
-            <li>Browse and manage filter lists</li>
-            <li>View the app's privacy documentation</li>
-            <li>Complete the onboarding flow</li>
-        </ul>
-        <p>URL filtering (blocking ads, trackers, malware, and adult content) requires an active subscription.</p>
+  <div class="clause"><span class="n">02</span><div>
+    <h2>Subscription</h2>
+    <ul class="dots">
+      <li>Phosphor requires an active subscription to enable URL filtering.</li>
+      <li>Subscriptions are available on a monthly ($29.99/month) or yearly ($249.99/year) basis.</li>
+      <li>New subscribers receive a <strong>7-day free trial</strong>. You will not be charged during the trial period.</li>
+      <li>Subscriptions <strong>automatically renew</strong> at the end of each billing period unless cancelled at least 24 hours before the renewal date.</li>
+      <li>Payment is charged to your Apple ID account at confirmation of purchase.</li>
+      <li>You can manage or cancel your subscription in <strong>Settings &gt; [Your Name] &gt; Subscriptions</strong> on your device.</li>
+    </ul>
+  </div></div>
 
-        <h2>4. No Guarantee of Filtering</h2>
-        <p>While Phosphor aims to block known unwanted URLs, we do not guarantee that all ads, trackers, malware, or unwanted content will be blocked. URL filtering depends on:</p>
-        <ul>
-            <li>The completeness and accuracy of the filter lists</li>
-            <li>The availability of the PIR server</li>
-            <li>Apple's OHTTP relay availability</li>
-            <li>iOS system behavior and limitations</li>
-        </ul>
-        <p>Phosphor is not a replacement for antivirus software, a VPN, or safe browsing practices.</p>
+  <div class="clause"><span class="n">03</span><div>
+    <h2>Free Features</h2>
+    <p>Without a subscription, you can:</p>
+    <ul class="dots" style="margin-bottom:12px">
+      <li>Browse and manage filter lists</li>
+      <li>View the app's privacy documentation</li>
+      <li>Complete the onboarding flow</li>
+    </ul>
+    <p>URL filtering (blocking ads, trackers, malware, and adult content) requires an active subscription.</p>
+  </div></div>
 
-        <h2>5. Service Availability</h2>
-        <p>We strive to maintain high availability of the PIR server and related infrastructure. However, the service may be temporarily unavailable due to maintenance, updates, or factors beyond our control. When the PIR server is unavailable, the on-device Bloom filter continues to function, and URLs that don't match the Bloom filter are allowed through (fail-open behavior).</p>
+  <div class="clause"><span class="n">04</span><div>
+    <h2>No Guarantee of Filtering</h2>
+    <p>While Phosphor aims to block known unwanted URLs, we do not guarantee that all ads, trackers, malware, or unwanted content will be blocked. URL filtering depends on:</p>
+    <ul class="dots" style="margin-bottom:12px">
+      <li>The completeness and accuracy of the filter lists</li>
+      <li>The availability of the PIR server</li>
+      <li>Apple's OHTTP relay availability</li>
+      <li>iOS system behavior and limitations</li>
+    </ul>
+    <p>Phosphor is not a replacement for antivirus software, a VPN, or safe browsing practices.</p>
+  </div></div>
 
-        <h2>6. Acceptable Use</h2>
-        <p>You agree not to:</p>
-        <ul>
-            <li>Reverse-engineer, decompile, or disassemble the app</li>
-            <li>Attempt to bypass the subscription requirement</li>
-            <li>Use the app for any illegal purpose</li>
-            <li>Interfere with or disrupt the PIR server or related services</li>
-        </ul>
+  <div class="clause"><span class="n">05</span><div>
+    <h2>Service Availability</h2>
+    <p>We strive to maintain high availability of the PIR server and related infrastructure. However, the service may be temporarily unavailable due to maintenance, updates, or factors beyond our control. When the PIR server is unavailable, the on-device Bloom filter continues to function, and URLs that don't match the Bloom filter are allowed through (fail-open behavior).</p>
+  </div></div>
 
-        <h2>7. Intellectual Property</h2>
-        <p>Phosphor is open source under the MIT License. The source code is available at <a href="https://github.com/victorantos/Phosphor">github.com/victorantos/Phosphor</a>. The Phosphor name and branding are proprietary.</p>
+  <div class="clause"><span class="n">06</span><div>
+    <h2>Acceptable Use</h2>
+    <p>You agree not to:</p>
+    <ul class="dots">
+      <li>Reverse-engineer, decompile, or disassemble the app</li>
+      <li>Attempt to bypass the subscription requirement</li>
+      <li>Use the app for any illegal purpose</li>
+      <li>Interfere with or disrupt the PIR server or related services</li>
+    </ul>
+  </div></div>
 
-        <h2>8. Disclaimer of Warranties</h2>
-        <p>THE APP IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. WE DO NOT WARRANT THAT THE APP WILL BE UNINTERRUPTED, ERROR-FREE, OR THAT ALL URLS WILL BE CORRECTLY FILTERED.</p>
+  <div class="clause"><span class="n">07</span><div>
+    <h2>Intellectual Property</h2>
+    <p>Phosphor is open source under the MIT License. The source code is available at <a href="https://github.com/victorantos/Phosphor">github.com/victorantos/Phosphor</a>. The Phosphor name and branding are proprietary.</p>
+  </div></div>
 
-        <h2>9. Limitation of Liability</h2>
-        <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, WE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE APP.</p>
+  <div class="clause"><span class="n">08</span><div>
+    <h2>Disclaimer of Warranties</h2>
+    <p>THE APP IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. WE DO NOT WARRANT THAT THE APP WILL BE UNINTERRUPTED, ERROR-FREE, OR THAT ALL URLS WILL BE CORRECTLY FILTERED.</p>
+  </div></div>
 
-        <h2>10. Changes to Terms</h2>
-        <p>We may update these Terms from time to time. Continued use of the app after changes constitutes acceptance of the new Terms.</p>
+  <div class="clause"><span class="n">09</span><div>
+    <h2>Limitation of Liability</h2>
+    <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, WE SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE APP.</p>
+  </div></div>
 
-        <h2>11. Contact</h2>
-        <p>For questions about these Terms, contact us at <a href="mailto:legal@phosphor.online">legal@phosphor.online</a>.</p>
+  <div class="clause"><span class="n">10</span><div>
+    <h2>Changes to Terms</h2>
+    <p>We may update these Terms from time to time. Continued use of the app after changes constitutes acceptance of the new Terms.</p>
+  </div></div>
 
-        <footer>
-            <a href="/">Home</a>
-            <a href="/privacy">Privacy Policy</a>
-            <p style="margin-top: 12px;">&copy; 2026 Phosphor</p>
-        </footer>
-    </div>
+  <div class="clause" style="margin-bottom:0"><span class="n">11</span><div>
+    <h2>Contact</h2>
+    <p>For questions about these Terms, contact us at <a href="mailto:legal@phosphor.online">legal@phosphor.online</a>.</p>
+  </div></div>
+</main>
+
+<footer class="site-footer site-footer--slim">
+  <div class="wrap">
+    <nav aria-label="Footer">
+      <a href="index.html">Home</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="support.html">Support</a>
+    </nav>
+    <span>© 2026 Phosphor</span>
+  </div>
+</footer>
+
+<script data-goatcounter="https://phosphor.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
