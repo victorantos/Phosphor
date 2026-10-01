@@ -70,11 +70,13 @@ final class DashboardViewModel {
     }
 
     private func apply(_ status: NEURLFilterManager.Status) {
-        // Between attempts a starting filter can read `stopped` or `invalid`, so only
+        // A starting filter can read `stopped` or `invalid` between attempts, so only
         // running or a switched-off filter ends the wait.
         if status == .running || !NEURLFilterManager.shared.isEnabled {
             if startingSince != nil { startingSince = nil }
-        } else if status == .starting, startingSince == nil {
+        } else if startingSince == nil {
+            // Switched on but not running, whichever status it reads: start the clock,
+            // so a filter stuck at `stopped` still gets the help after 10 minutes.
             startingSince = .now
         }
         if status != .running, SubscriptionGate.isPausedForSubscription {

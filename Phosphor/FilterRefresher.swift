@@ -58,12 +58,25 @@ enum FilterRefresher {
         try? await Task.sleep(for: .seconds(2))
         guard await manager.status == .stopped else { return }
 
+        // A start that failed because iOS could not find or load the extension, as
+        // happens right after the app is installed or updated, is not in progress and
+        // can be retried soon. Anything else may be a start still fetching tokens.
+        let reason = await manager.lastDisconnectError
+        let cooldown: TimeInterval
+        switch reason {
+        case .extensionNotFound, .extensionFailedToLoad, .extensionCancelled:
+            cooldown = 30
+        default:
+            cooldown = restartCooldown
+        }
         let defaults = UserDefaults.standard
         if let last = defaults.object(forKey: lastRestartKey) as? Date,
-           Date.now.timeIntervalSince(last) < restartCooldown {
+           Date.now.timeIntervalSince(last) < cooldown {
+            logger.info("Filter stopped (\(reason.map { String(describing: $0) } ?? "no error", privacy: .public)), restarted too recently to try again")
             return
         }
         defaults.set(Date.now, forKey: lastRestartKey)
+        logger.info("Filter stopped (\(reason.map { String(describing: $0) } ?? "no error", privacy: .public)), restarting")
 
         let background = UIApplication.shared.beginBackgroundTask(withName: "Restart URL filter")
         defer { UIApplication.shared.endBackgroundTask(background) }
