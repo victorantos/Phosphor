@@ -311,37 +311,45 @@ struct DashboardView: View {
 
     // MARK: - Empty state
 
+    /// Setup is offered only when it is what is missing. Running it again while the
+    /// filter is starting or paused would remove the configuration and start over.
+    /// A starting filter gets `FilterStartingCard` instead.
+    private var emptyStateCopy: (title: String, detail: String, offersSetup: Bool) {
+        if isFilterRunning {
+            return ("Filtering active",
+                    "iOS checks every URL itself and does not tell apps what it blocked, so there are no block counts to show. Your lists are below.",
+                    false)
+        }
+        if !subscriptionManager.isSubscribed {
+            return ("Filtering not active",
+                    "Filtering turns on once Phosphor Premium is active.",
+                    false)
+        }
+        if viewModel.filterStatus == "Paused" {
+            return ("Filtering paused",
+                    "Resume it any time from Settings.",
+                    false)
+        }
+        return ("Filtering not active",
+                "URL filtering is not running. Turn it on to block ads, trackers and malware across every app.",
+                true)
+    }
+
+    private var isFilterStarting: Bool {
+        subscriptionManager.isSubscribed && viewModel.filterIsEnabled && !isFilterRunning
+            && viewModel.filterStatus != "Paused"
+    }
+
     private var emptyState: some View {
         VStack(spacing: 16) {
-            PhosphorCard(padding: 28, radius: 22, lit: isFilterRunning) {
-                VStack(spacing: 16) {
-                    PhosphorMark(size: 72)
-
-                    VStack(spacing: 8) {
-                        Text(isFilterRunning ? "Filtering active" : "Filtering not active")
-                            .font(.system(size: 26, weight: .bold))
-                            .kerning(-0.8)
-                            .foregroundStyle(PhosphorTheme.ink50)
-                            .multilineTextAlignment(.center)
-
-                        Text(isFilterRunning
-                             ? "iOS checks every URL itself and does not tell apps what it blocked, so there are no block counts to show. Your lists are below."
-                             : "URL filtering is not running. Turn it on to block ads, trackers and malware across every app.")
-                            .font(.system(size: 15))
-                            .foregroundStyle(PhosphorTheme.ink300)
-                            .multilineTextAlignment(.center)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    if !isFilterRunning {
-                        Button("Set up filtering") {
-                            UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
-                        }
-                        .buttonStyle(PhosphorPrimaryButtonStyle())
-                        .padding(.top, 4)
-                    }
+            if isFilterStarting {
+                FilterStartingCard(since: viewModel.startingSince) {
+                    await FilterRefresher.restartNow()
+                    viewModel.startingSince = nil
+                    viewModel.load()
                 }
-                .frame(maxWidth: .infinity)
+            } else {
+                statusCard
             }
 
             HStack(spacing: 10) {
@@ -350,6 +358,37 @@ struct DashboardView: View {
             }
         }
         .padding(.top, 8)
+    }
+
+    private var statusCard: some View {
+        PhosphorCard(padding: 28, radius: 22, lit: isFilterRunning) {
+            VStack(spacing: 16) {
+                PhosphorMark(size: 72)
+
+                VStack(spacing: 8) {
+                    Text(emptyStateCopy.title)
+                        .font(.system(size: 26, weight: .bold))
+                        .kerning(-0.8)
+                        .foregroundStyle(PhosphorTheme.ink50)
+                        .multilineTextAlignment(.center)
+
+                    Text(emptyStateCopy.detail)
+                        .font(.system(size: 15))
+                        .foregroundStyle(PhosphorTheme.ink300)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                if emptyStateCopy.offersSetup {
+                    Button("Set up filtering") {
+                        UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+                    }
+                    .buttonStyle(PhosphorPrimaryButtonStyle())
+                    .padding(.top, 4)
+                }
+            }
+            .frame(maxWidth: .infinity)
+        }
     }
 
     // MARK: - Helpers

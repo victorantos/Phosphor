@@ -70,6 +70,12 @@ enum FilterRefresher {
         await restart(reason: "because it had stopped")
     }
 
+    /// Restarts the filter at the user's request, when starting takes too long.
+    static func restartNow() async {
+        UserDefaults.standard.set(Date.now, forKey: lastRestartKey)
+        await restart(reason: "at the user's request")
+    }
+
     private static func restart(reason: String) async {
         do {
             let manager = NEURLFilterManager.shared

@@ -16,6 +16,14 @@ final class DashboardViewModel {
     var filterIsEnabled = false
     var filterStatus: String = "Unknown"
 
+    /// When the app first saw the filter starting, kept across launches so the
+    /// dashboard can say how long it has been. Cleared once it runs or is switched off.
+    var startingSince: Date? {
+        get { UserDefaults.standard.object(forKey: Self.startingSinceKey) as? Date }
+        set { UserDefaults.standard.set(newValue, forKey: Self.startingSinceKey) }
+    }
+    private static let startingSinceKey = "filterStartingSince"
+
     init(store: FilterListStore = FilterListStore()) {
         self.store = store
     }
@@ -62,6 +70,13 @@ final class DashboardViewModel {
     }
 
     private func apply(_ status: NEURLFilterManager.Status) {
+        // Between attempts a starting filter can read `stopped` or `invalid`, so only
+        // running or a switched-off filter ends the wait.
+        if status == .running || !NEURLFilterManager.shared.isEnabled {
+            if startingSince != nil { startingSince = nil }
+        } else if status == .starting, startingSince == nil {
+            startingSince = .now
+        }
         if status != .running, SubscriptionGate.isPausedForSubscription {
             filterStatus = "Paused"
             return
