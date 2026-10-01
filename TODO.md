@@ -200,7 +200,11 @@ it is the default), monthly $1.99, 7-day free trial on both, no lifetime plan.
       the 2026-09-29 rotation. `build/server-scripts/pir-add-apple-test-token.sh` adds it
       back next to the app token; run 2026-10-01, both tokens now return 200. Next: Apple
       re-runs onboarding validation (message drafted for the user to send).
-- [ ] Setup screen still says "~99.9% never leave the phone"; reword like the listing.
+- [x] App Store listing screenshots replaced 2026-10-01 (iPhone 4, iPad 2), made with
+      `Tools/appstore-screenshots` from the debug screenshot mode; no "99.9%", "four
+      lists" or "resume automatically" claims. The setup and About screens no longer say
+      99.9%, and bundled lists show under Built-in again. These app changes are not in
+      TestFlight build 5: upload build 6 before submitting.
 - [ ] Resubmit with a note for App Review that
       Safari has to be reopened after a list is changed. Not needed after first setup:
       on a clean install Safari blocked at once without being reopened (2026-10-01).
