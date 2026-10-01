@@ -110,7 +110,13 @@ it is the default), monthly $1.99, 7-day free trial on both, no lifetime plan.
 
 - [x] Gate verified on the iPhone 11 (2026-10-01): with no subscription the filter
       paused and xvideos.com was allowed; with the override it resumed and blocked again.
-- [ ] Trial purchase, reminders and the "Protection paused" path with local StoreKit.
+- [x] Annual purchase with local StoreKit switched the filter back on (2026-10-01).
+- [ ] Reminders and the "Protection paused" path with local StoreKit. Use the rate
+      "1 Renewal Every 5 Minutes" (set in `Phosphor.storekit`); "every 2 seconds" renews
+      too fast to switch auto-renew off. The reminder comes at 2/7 of the period when
+      that is under 2 days, so it also shows in accelerated tests.
+- [ ] Check FilterStartingCard on a device: the steps and timer while starting, and the
+      "Restart filter" help after 10 minutes.
 - [ ] Background refresh actually pauses a lapsed filter without the app being opened.
       Hard to force; Xcode's Debug › Simulate Background Fetch helps.
 - [ ] The dashboard has no block counts: nothing in the app records them and iOS does
