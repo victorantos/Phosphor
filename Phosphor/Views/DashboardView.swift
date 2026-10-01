@@ -65,7 +65,7 @@ struct DashboardView: View {
     private var statusPill: some View {
         HStack(spacing: 8) {
             PulseDot(size: 8, isLive: isFilterRunning, color: statusColor)
-            Text(isFilterRunning ? "Active" : viewModel.filterStatus)
+            Text(statusText)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(PhosphorTheme.ink50)
         }
@@ -75,11 +75,20 @@ struct DashboardView: View {
         .background(Capsule().fill(statusColor.opacity(0.08)))
         .overlay(Capsule().strokeBorder(statusColor.opacity(0.25), lineWidth: 1))
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Filter status: \(isFilterRunning ? "active" : viewModel.filterStatus)")
+        .accessibilityLabel("Filter status: \(statusText)")
+    }
+
+    /// Between attempts a starting filter reads `stopped`; the pill follows the
+    /// starting card instead of showing that.
+    private var statusText: String {
+        if isFilterRunning { return "Active" }
+        if isFilterStarting { return "Starting" }
+        return viewModel.filterStatus
     }
 
     private var statusColor: Color {
-        switch viewModel.filterStatus {
+        if isFilterStarting { return PhosphorTheme.signalAmber }
+        return switch viewModel.filterStatus {
         case "Running": PhosphorTheme.phosphor
         case "Starting", "Stopping", "Stopped": PhosphorTheme.signalAmber
         default: PhosphorTheme.signalRed

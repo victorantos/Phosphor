@@ -117,6 +117,14 @@ it is the default), monthly $1.99, 7-day free trial on both, no lifetime plan.
       that is under 2 days, so it also shows in accelerated tests.
 - [ ] Check FilterStartingCard on a device: the steps and timer while starting, and the
       "Restart filter" help after 10 minutes.
+- [ ] After a reinstall from Xcode (2026-10-01) iOS tried to start the filter before it
+      could find the extension ("identities [] / no matching extension found"), the
+      start failed and iOS did not retry; the filter stayed `stopped` until the app was
+      opened. Check whether an App Store or TestFlight update does the same to a real
+      user's filter.
+- [ ] Custom paywall (replaced SubscriptionStoreView 2026-10-01 for layout and the
+      duplicate policy links): test a purchase, Restore, and a user not eligible for
+      the trial ("Subscribe" and no trial line).
 - [ ] Background refresh actually pauses a lapsed filter without the app being opened.
       Hard to force; Xcode's Debug › Simulate Background Fetch helps.
 - [ ] The dashboard has no block counts: nothing in the app records them and iOS does

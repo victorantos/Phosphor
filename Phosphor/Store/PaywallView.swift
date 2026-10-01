@@ -1,50 +1,43 @@
 import StoreKit
 import SwiftUI
 
+/// Our own paywall rather than StoreKit's `SubscriptionStoreView`: the store view
+/// cannot preselect a plan, and it adds its own policy links wherever it likes. App
+/// Review needs the plan name, length and price next to the purchase button, the
+/// auto-renewal terms, Restore, and working links to the terms and privacy policy;
+/// all of them are here.
 struct PaywallView: View {
     @Environment(SubscriptionManager.self) private var subscriptionManager
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.purchase) private var purchase
 
-    /// Looked up by product ID: the group ID in App Store Connect is not the
-    /// one in the local StoreKit file, so a group lookup only works in Xcode.
-    /// The store view lists plans in this order, so annual comes first.
-    private let productIDs = [SubscriptionManager.yearlyID, SubscriptionManager.monthlyID]
+    @State private var selectedID = SubscriptionManager.yearlyID
+    @State private var trialEligible: [String: Bool] = [:]
+    @State private var isPurchasing = false
+    @State private var isRestoring = false
+    @State private var errorMessage: String?
+
     private let privacyPolicyURL = URL(string: "https://phosphor.online/privacy")!
     private let termsOfServiceURL = URL(string: "https://phosphor.online/terms")!
 
+    private var yearly: Product? { subscriptionManager.yearlyProduct }
+    private var monthly: Product? { subscriptionManager.monthlyProduct }
+    private var selected: Product? { selectedID == SubscriptionManager.yearlyID ? yearly : monthly }
+
     var body: some View {
         NavigationStack {
-            // StoreKit's own store view stays in charge of the plan picker,
-            // purchase, restore and the policy buttons — App Review checks those.
-            // Only the marketing content above it is ours to design.
-            SubscriptionStoreView(productIDs: productIDs) {
+            ScrollView {
                 marketingContent
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                    .padding(.bottom, 24)
             }
-            // Both plans sit in the bottom bar next to the purchase button, so they are
-            // visible without scrolling past the marketing copy and terms.
-            .subscriptionStoreControlStyle(.compactPicker, placement: .bottomBar)
-            .subscriptionStorePickerItemBackground(PhosphorTheme.ink900)
-            .storeButton(.visible, for: .restorePurchases)
-            .storeButton(.visible, for: .policies)
-            .storeButton(.hidden, for: .cancellation)
-            .subscriptionStorePolicyDestination(url: privacyPolicyURL, for: .privacyPolicy)
-            .subscriptionStorePolicyDestination(url: termsOfServiceURL, for: .termsOfService)
+            .scrollIndicators(.hidden)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                purchasePanel
+            }
             .background(paywallBackdrop)
             .tint(PhosphorTheme.phosphor)
-            .onInAppPurchaseCompletion { _, result in
-                switch result {
-                case .success(.success):
-                    Task {
-                        await subscriptionManager.updateSubscriptionStatus()
-                        // The trial reminder needs permission to notify.
-                        await SubscriptionReminders.requestAuthorization()
-                        await SubscriptionGate.run()
-                        dismiss()
-                    }
-                default:
-                    break
-                }
-            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button {
@@ -60,11 +53,16 @@ struct PaywallView: View {
                 }
             }
             .toolbarBackground(PhosphorTheme.ink950, for: .navigationBar)
-            .task {
-                if subscriptionManager.products.isEmpty {
-                    await subscriptionManager.loadProducts()
-                }
-            }
+            .task { await load() }
+        }
+    }
+
+    private func load() async {
+        if subscriptionManager.products.isEmpty {
+            await subscriptionManager.loadProducts()
+        }
+        for product in subscriptionManager.products {
+            trialEligible[product.id] = await product.subscription?.isEligibleForIntroOffer ?? false
         }
     }
 
@@ -112,48 +110,258 @@ struct PaywallView: View {
                 FeatureItem(text: "A reminder 2 days before your free trial ends")
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.bottom, 20)
-
-            subscriptionTerms
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 8)
     }
 
-    // MARK: - Subscription Terms & Legal Links
+    // MARK: - Purchase Panel
 
-    private var legalLinks: AttributedString {
-        var terms = AttributedString("Terms of Use (EULA)")
-        terms.link = termsOfServiceURL
-        var privacy = AttributedString("Privacy Policy")
-        privacy.link = privacyPolicyURL
-        return terms + AttributedString(" · ") + privacy
-    }
+    private var purchasePanel: some View {
+        VStack(spacing: 12) {
+            if let yearly, let monthly {
+                HStack(spacing: 10) {
+                    PlanCard(
+                        title: "Yearly",
+                        price: "\(yearly.displayPrice)/year",
+                        detail: "\(Self.perMonth(yearly)) a month",
+                        badge: Self.savings(yearly: yearly, monthly: monthly).map { "Save \($0)%" },
+                        isSelected: selectedID == yearly.id
+                    ) { selectedID = yearly.id }
 
-    /// Prices come from the App Store so they match the user's storefront.
-    private var termsText: String {
-        var plans = "Choose Annual or Monthly."
-        if let yearly = subscriptionManager.yearlyProduct, let monthly = subscriptionManager.monthlyProduct {
-            plans = "Choose Annual (\(yearly.displayPrice) a year) or Monthly (\(monthly.displayPrice) a month)."
-        }
-        return "Phosphor Premium is an auto-renewing subscription and is required for filtering. \(plans) New subscribers get a 7-day free trial; payment is charged to your Apple ID when the trial ends, or at confirmation if you are not eligible for a trial. The subscription renews automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel any time in Settings › Apple Account › Subscriptions."
-    }
+                    PlanCard(
+                        title: "Monthly",
+                        price: "\(monthly.displayPrice)/month",
+                        detail: "Billed monthly",
+                        badge: nil,
+                        isSelected: selectedID == monthly.id
+                    ) { selectedID = monthly.id }
+                }
+            } else if subscriptionManager.purchaseError != nil {
+                VStack(spacing: 8) {
+                    Text("Plans could not be loaded.")
+                        .font(.system(size: 15))
+                        .foregroundStyle(PhosphorTheme.ink300)
+                    Button("Try again") { Task { await load() } }
+                        .font(.system(size: 15, weight: .semibold))
+                }
+                .frame(height: 96)
+            } else {
+                ProgressView()
+                    .tint(PhosphorTheme.ink300)
+                    .frame(height: 96)
+            }
 
-    private var subscriptionTerms: some View {
-        VStack(spacing: 10) {
+            if let selected {
+                Text(offerLine(for: selected))
+                    .font(.system(size: 14))
+                    .foregroundStyle(PhosphorTheme.ink300)
+                    .multilineTextAlignment(.center)
+            }
+
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.system(size: 13))
+                    .foregroundStyle(PhosphorTheme.signalRed)
+                    .multilineTextAlignment(.center)
+            }
+
+            Button {
+                Task { await buy() }
+            } label: {
+                if isPurchasing {
+                    ProgressView().tint(PhosphorTheme.ink950)
+                } else {
+                    Text(isTrialAvailable ? "Start free trial" : "Subscribe")
+                }
+            }
+            .buttonStyle(PhosphorPrimaryButtonStyle())
+            .disabled(selected == nil || isPurchasing || isRestoring)
+
+            linksRow
+
             Text(termsText)
-                .font(.system(size: 12))
+                .font(.system(size: 11))
                 .foregroundStyle(PhosphorTheme.ink400)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
-
-            // Inline links: a Link here would be drawn as a large button by the store view.
-            Text(legalLinks)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(PhosphorTheme.ink400)
-                .tint(PhosphorTheme.phosphor)
         }
-        .padding(.top, 4)
+        .padding(.horizontal, 20)
+        .padding(.top, 14)
+        .padding(.bottom, 6)
+        .background {
+            PhosphorTheme.ink950
+                .overlay(alignment: .top) {
+                    Rectangle().fill(PhosphorTheme.line).frame(height: 1)
+                }
+                .ignoresSafeArea()
+        }
+    }
+
+    private var linksRow: some View {
+        HStack(spacing: 6) {
+            Button(isRestoring ? "Restoring…" : "Restore") {
+                Task { await restore() }
+            }
+            .disabled(isPurchasing || isRestoring)
+            Text("·").foregroundStyle(PhosphorTheme.ink600)
+            Link("Terms of Use (EULA)", destination: termsOfServiceURL)
+            Text("·").foregroundStyle(PhosphorTheme.ink600)
+            Link("Privacy Policy", destination: privacyPolicyURL)
+        }
+        .font(.system(size: 12, weight: .medium))
+        .buttonStyle(.plain)
+        .foregroundStyle(PhosphorTheme.phosphor)
+    }
+
+    // MARK: - Copy
+
+    private var isTrialAvailable: Bool {
+        guard let selected else { return false }
+        return trialEligible[selected.id] == true && selected.subscription?.introductoryOffer != nil
+    }
+
+    private func offerLine(for product: Product) -> String {
+        let price = Self.priceWithPeriod(product)
+        if isTrialAvailable, let trial = product.subscription?.introductoryOffer {
+            return "\(Self.describe(trial.period)) free, then \(price). Cancel anytime."
+        }
+        return "\(price). Cancel anytime."
+    }
+
+    /// The auto-renewal terms App Review asks for, for the selected plan.
+    private var termsText: String {
+        let renewal = selected.map { "\(Self.priceWithPeriod($0)) " } ?? ""
+        let charge = isTrialAvailable ? "when the free trial ends" : "at confirmation of purchase"
+        return "Phosphor Premium is required for filtering. Payment of \(renewal)is charged to your Apple ID \(charge). The subscription renews automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple Account › Subscriptions."
+    }
+
+    private static func priceWithPeriod(_ product: Product) -> String {
+        switch product.subscription?.subscriptionPeriod.unit {
+        case .year: "\(product.displayPrice)/year"
+        case .month: "\(product.displayPrice)/month"
+        default: product.displayPrice
+        }
+    }
+
+    private static func describe(_ period: Product.SubscriptionPeriod) -> String {
+        switch (period.unit, period.value) {
+        case (.week, 1): "7 days"
+        case (.day, let n): "\(n) days"
+        case (.week, let n): "\(n) weeks"
+        case (.month, 1): "1 month"
+        case (.month, let n): "\(n) months"
+        default: "Free trial,"
+        }
+    }
+
+    private static func perMonth(_ yearly: Product) -> String {
+        (yearly.price / 12).formatted(yearly.priceFormatStyle)
+    }
+
+    /// Whole-percent saving of the yearly plan against twelve monthly payments.
+    private static func savings(yearly: Product, monthly: Product) -> Int? {
+        let twelveMonths = monthly.price * 12
+        guard twelveMonths > 0 else { return nil }
+        let fraction = 1 - NSDecimalNumber(decimal: yearly.price / twelveMonths).doubleValue
+        let percent = Int(fraction * 100)
+        return percent > 0 ? percent : nil
+    }
+
+    // MARK: - Actions
+
+    private func buy() async {
+        guard let selected else { return }
+        isPurchasing = true
+        errorMessage = nil
+        defer { isPurchasing = false }
+
+        do {
+            switch try await purchase(selected) {
+            case .success(.verified(let transaction)):
+                await transaction.finish()
+                await subscriptionManager.updateSubscriptionStatus()
+                // The trial reminder needs permission to notify.
+                await SubscriptionReminders.requestAuthorization()
+                await SubscriptionGate.run()
+                dismiss()
+            case .success(.unverified):
+                errorMessage = "The purchase could not be verified. Try Restore."
+            case .pending:
+                errorMessage = "The purchase is waiting for approval."
+            case .userCancelled:
+                break
+            @unknown default:
+                break
+            }
+        } catch {
+            errorMessage = "The purchase did not go through. Please try again."
+        }
+    }
+
+    private func restore() async {
+        isRestoring = true
+        errorMessage = nil
+        defer { isRestoring = false }
+        await subscriptionManager.restorePurchases()
+        if subscriptionManager.isSubscribed {
+            await SubscriptionGate.run()
+            dismiss()
+        } else {
+            errorMessage = "No active subscription was found for this Apple Account."
+        }
+    }
+}
+
+// MARK: - Plan Card
+
+private struct PlanCard: View {
+    let title: String
+    let price: String
+    let detail: String
+    let badge: String?
+    let isSelected: Bool
+    let select: () -> Void
+
+    var body: some View {
+        Button(action: select) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(title)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(isSelected ? PhosphorTheme.phosphor : PhosphorTheme.ink300)
+                    Spacer(minLength: 4)
+                    if let badge {
+                        Text(badge)
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(PhosphorTheme.ink950)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 3)
+                            .background(Capsule().fill(PhosphorTheme.phosphor))
+                    }
+                }
+                Text(price)
+                    .font(.system(size: 19, weight: .bold))
+                    .foregroundStyle(PhosphorTheme.ink50)
+                    .minimumScaleFactor(0.8)
+                    .lineLimit(1)
+                Text(detail)
+                    .font(.system(size: 13))
+                    .foregroundStyle(PhosphorTheme.ink400)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
+                RoundedRectangle(cornerRadius: PhosphorTheme.tileRadius, style: .continuous)
+                    .fill(isSelected ? PhosphorTheme.phosphorTint : PhosphorTheme.ink900)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: PhosphorTheme.tileRadius, style: .continuous)
+                    .strokeBorder(isSelected ? PhosphorTheme.phosphor : PhosphorTheme.lineStrong,
+                                  lineWidth: isSelected ? 2 : 1)
+            }
+        }
+        .buttonStyle(.plain)
+        .animation(PhosphorTheme.controlAnimation, value: isSelected)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 

@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "·" : {
+
+    },
     "%@ active list%@" : {
       "localizations" : {
         "en" : {
@@ -85,6 +88,9 @@
 
     },
     "PHOSPHOR PREMIUM" : {
+
+    },
+    "Plans could not be loaded." : {
 
     },
     "Privacy-preserving, system-wide URL filtering for iOS 26." : {
