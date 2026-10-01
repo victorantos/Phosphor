@@ -43,6 +43,7 @@ struct PhosphorApp: App {
                 guard phase == .active else { return }
                 Task {
                     await FilterPause.reconcile()
+                    await FilterParsing.updateSavedConfiguration()
                     await FilterRefresher.restartIfStopped()
                     await skipOnboardingIfFilterIsRunning()
                     await FilterProbe.runIfRequested()

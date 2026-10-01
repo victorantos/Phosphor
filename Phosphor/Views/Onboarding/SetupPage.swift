@@ -283,6 +283,7 @@ struct SetupPage: View {
             manager.isEnabled = true
             manager.shouldFailClosed = false
             manager.prefilterFetchInterval = 86400
+            FilterParsing.apply(to: manager)
 
             try await manager.saveToPreferences()
             Self.logger.info("Saved filter configuration for \(pirURL.absoluteString, privacy: .public)")

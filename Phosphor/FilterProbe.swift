@@ -11,6 +11,11 @@ enum FilterProbe {
 
     static func runIfRequested() async {
         guard let list = ProcessInfo.processInfo.environment["PHOSPHOR_PROBE_URLS"] else { return }
+        if #available(iOS 27, *) {
+            let manager = NEURLFilterManager.shared
+            try? await manager.loadFromPreferences()
+            logger.info("PROBE parsing \(String(describing: manager.urlParsingConfiguration), privacy: .public)")
+        }
         for text in list.split(separator: ",") {
             guard let url = URL(string: String(text)) else { continue }
             let verdict = await NEURLFilter.verdict(for: url)
