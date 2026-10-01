@@ -1,6 +1,7 @@
 import NetworkExtension
 import PhosphorShared
 import SwiftUI
+import UserNotifications
 
 @main
 struct PhosphorApp: App {
@@ -11,6 +12,7 @@ struct PhosphorApp: App {
 
     init() {
         importBundledListsIfNeeded()
+        UNUserNotificationCenter.current().delegate = SubscriptionReminders.presenter
     }
 
     var body: some Scene {

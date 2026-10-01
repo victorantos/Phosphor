@@ -280,7 +280,7 @@ struct PaywallView: View {
         do {
             switch try await purchase(selected) {
             case .success(.verified(let transaction)):
-                Self.logger.info("Purchase returned transaction \(transaction.id) for \(transaction.productID, privacy: .public), expires \(transaction.expirationDate?.description ?? "never", privacy: .public), revoked: \(transaction.revocationDate != nil)")
+                Self.logger.notice("Purchase returned transaction \(transaction.id) for \(transaction.productID, privacy: .public), expires \(transaction.expirationDate?.description ?? "never", privacy: .public), revoked: \(transaction.revocationDate != nil)")
                 await transaction.finish()
                 await subscriptionManager.updateSubscriptionStatus()
                 // StoreKit can report success with a transaction that grants nothing,

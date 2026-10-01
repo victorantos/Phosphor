@@ -23,11 +23,24 @@ enum SubscriptionReminders {
 
     private static var center: UNUserNotificationCenter { .current() }
 
+    /// Shows Phosphor's notifications while the app is open too; by default iOS drops
+    /// them silently, and a trial reminder should not vanish because the app was in front.
+    static let presenter = ForegroundPresenter()
+
+    final class ForegroundPresenter: NSObject, UNUserNotificationCenterDelegate, Sendable {
+        func userNotificationCenter(
+            _ center: UNUserNotificationCenter,
+            willPresent notification: UNNotification
+        ) async -> UNNotificationPresentationOptions {
+            [.banner, .list, .sound]
+        }
+    }
+
     /// Asked right after a purchase, when the reminder it enables makes sense.
     static func requestAuthorization() async {
         do {
             let granted = try await center.requestAuthorization(options: [.alert, .sound])
-            logger.info("Notifications \(granted ? "allowed" : "declined")")
+            logger.notice("Notifications \(granted ? "allowed" : "declined")")
         } catch {
             logger.error("Notification authorization failed: \(error.localizedDescription, privacy: .public)")
         }
@@ -41,6 +54,7 @@ enum SubscriptionReminders {
         let isTrial = entitlement.offer?.type == .introductory
             && entitlement.offer?.paymentMode == .freeTrial
         let willRenew = await willAutoRenew(entitlement)
+        logger.notice("Planning reminders for \(entitlement.id): trial \(isTrial) (offer \(String(describing: entitlement.offer?.type), privacy: .public), \(String(describing: entitlement.offer?.paymentMode), privacy: .public)), renews \(willRenew), ends \(expiration.description, privacy: .public)")
         let endDate = expiration.formatted(date: .abbreviated, time: .omitted)
         let reminderDate = expiration.addingTimeInterval(-leadTime(for: entitlement, expiration: expiration))
 
@@ -107,7 +121,10 @@ enum SubscriptionReminders {
         let trigger: UNNotificationTrigger?
         if let date {
             let interval = date.timeIntervalSinceNow
-            guard interval > 1 else { return }
+            guard interval > 1 else {
+                logger.notice("Skipped \(id, privacy: .public): its time has passed")
+                return
+            }
             trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
         } else {
             trigger = nil
@@ -118,6 +135,7 @@ enum SubscriptionReminders {
         content.sound = .default
         do {
             try await center.add(UNNotificationRequest(identifier: id, content: content, trigger: trigger))
+            logger.notice("Scheduled \(id, privacy: .public) \(date.map { "for \($0.description)" } ?? "now", privacy: .public)")
         } catch {
             logger.error("Scheduling \(id, privacy: .public) failed: \(error.localizedDescription, privacy: .public)")
         }

@@ -48,7 +48,7 @@ enum SubscriptionGate {
                 guard !FilterPause.isActive, !manager.isEnabled else { return false }
                 manager.isEnabled = true
                 try await manager.saveToPreferences()
-                logger.info("Subscription active again, filter resumed")
+                logger.notice("Subscription active again, filter resumed")
                 return false
             }
 
@@ -60,7 +60,7 @@ enum SubscriptionGate {
                 manager.isEnabled = false
                 try await manager.saveToPreferences()
             }
-            logger.info("No active subscription, filter paused")
+            logger.notice("No active subscription, filter paused")
             return true
         } catch {
             logger.error("Applying subscription state failed: \(error.localizedDescription, privacy: .public)")

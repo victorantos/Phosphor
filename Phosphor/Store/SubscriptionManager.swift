@@ -50,7 +50,7 @@ final class SubscriptionManager {
         do {
             products = try await Product.products(for: Self.productIDs)
                 .sorted { $0.price < $1.price }
-            Self.logger.info("Loaded \(self.products.count) products")
+            Self.logger.notice("Loaded \(self.products.count) products")
             await updateSubscriptionStatus()
         } catch {
             Self.logger.error("Failed to load products: \(error.localizedDescription)")
@@ -72,13 +72,13 @@ final class SubscriptionManager {
                 let transaction = try checkVerified(verification)
                 await transaction.finish()
                 await updateSubscriptionStatus()
-                Self.logger.info("Purchase successful: \(product.id)")
+                Self.logger.notice("Purchase successful: \(product.id)")
 
             case .userCancelled:
-                Self.logger.info("User cancelled purchase")
+                Self.logger.notice("User cancelled purchase")
 
             case .pending:
-                Self.logger.info("Purchase pending (ask to buy)")
+                Self.logger.notice("Purchase pending (ask to buy)")
                 purchaseError = "Purchase is pending approval."
 
             @unknown default:
@@ -99,7 +99,7 @@ final class SubscriptionManager {
         do {
             try await AppStore.sync()
             await updateSubscriptionStatus()
-            Self.logger.info("Purchases restored, subscribed: \(self.isSubscribed)")
+            Self.logger.notice("Purchases restored, subscribed: \(self.isSubscribed)")
         } catch {
             Self.logger.error("Restore failed: \(error.localizedDescription)")
             purchaseError = "Unable to restore purchases."
@@ -113,7 +113,7 @@ final class SubscriptionManager {
         activeProductID = entitlement?.productID
         isSubscribed = entitlement != nil || Self.assumesSubscribed
 
-        Self.logger.info("Subscription status: \(self.isSubscribed ? "active" : "inactive")")
+        Self.logger.notice("Subscription status: \(self.isSubscribed ? "active" : "inactive")")
     }
 
     /// The transaction that gives access to Premium right now, a free trial included.
@@ -123,7 +123,7 @@ final class SubscriptionManager {
             guard case .verified(let transaction) = result,
                   productIDs.contains(transaction.productID)
             else { continue }
-            logger.info("Entitlement \(transaction.id) \(transaction.productID, privacy: .public): expires \(transaction.expirationDate?.description ?? "never", privacy: .public), revoked \(transaction.revocationDate != nil)")
+            logger.notice("Entitlement \(transaction.id) \(transaction.productID, privacy: .public): expires \(transaction.expirationDate?.description ?? "never", privacy: .public), revoked \(transaction.revocationDate != nil)")
             if grantsAccess(transaction) { return transaction }
         }
         // After a refund, currentEntitlements was seen to keep returning the refunded
@@ -133,7 +133,7 @@ final class SubscriptionManager {
             guard let result = await Transaction.latest(for: productID),
                   case .verified(let transaction) = result
             else { continue }
-            logger.info("Latest \(transaction.id) \(productID, privacy: .public): expires \(transaction.expirationDate?.description ?? "never", privacy: .public), revoked \(transaction.revocationDate != nil)")
+            logger.notice("Latest \(transaction.id) \(productID, privacy: .public): expires \(transaction.expirationDate?.description ?? "never", privacy: .public), revoked \(transaction.revocationDate != nil)")
             if grantsAccess(transaction) { return transaction }
         }
         return nil

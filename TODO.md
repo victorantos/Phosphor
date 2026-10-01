@@ -118,14 +118,18 @@ it is the default), monthly $1.99, 7-day free trial on both, no lifetime plan.
       `SubscriptionManager.currentEntitlement()` now also checks `Transaction.latest(for:)`
       per plan; after that the Renew card went and the filter turned back on
       (2026-10-01). The paywall now closes only when access is really active.
-- [ ] Cancel (auto-renew off) and let the period run out: the user saw nothing happen
-      after cancelling with "1 Renewal Every 5 Minutes"; unclear whether the period had
-      ended and the app was reopened. Retest, watching the console for
-      `Subscription status` and `SubscriptionGate`.
-- [ ] Reminders and the "Protection paused" path with local StoreKit. Use the rate
-      "1 Renewal Every 5 Minutes" (set in `Phosphor.storekit`); "every 2 seconds" renews
-      too fast to switch auto-renew off. The reminder comes at 2/7 of the period when
-      that is under 2 days, so it also shows in accelerated tests.
+- [x] Cancel (auto-renew off) and let the period run out: on reopening, filtering
+      paused and the paywall came up (iPhone 15, "1 Renewal Every 30 Seconds",
+      2026-10-01). The earlier "nothing happens" was the app running on the iPhone 11,
+      which has the debug override on.
+- [x] Reminders with local StoreKit (2026-10-01): StoreKit marks the trial
+      (offer introductory, free trial), permission was granted, the trial reminder was
+      scheduled 2/7 of the period before the end and "Protection paused" was sent
+      when the filter paused. Nothing popped up because the iPhone 15 had a Focus mode
+      on (iOS logged "suppressed, delay delivery"); they go to Notification Center.
+      Subscription and reminder messages are logged at notice level so they can be
+      read from the phone's log over USB (`pymobiledevice3 syslog collect`, then
+      `/usr/bin/log show --archive ... --predicate 'subsystem == "com.nestclaw.phosphor"'`).
 - [ ] Check FilterStartingCard on a device: the steps and timer while starting, and the
       "Restart filter" help after 10 minutes.
 - [ ] After a reinstall from Xcode (2026-10-01) iOS tried to start the filter before it
