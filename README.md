@@ -25,7 +25,7 @@ URL Request → On-Device Bloom Filter → (miss) → Allow immediately
 - **4 built-in filter lists** — Ads (Peter Lowe), Trackers (EasyPrivacy), Malware (URLhaus), Adult Content (StevenBlack) — 123K+ domains
 - **Custom lists** — Add any remote hosts-format or domain list URL
 - **Manual entries** — Block or allow individual URLs/domains
-- **Dashboard** — Block stats in the Phosphor design system: a hero count for today, week/month/all-time tiles, single-hue category meters and a 14-day trend
+- **Dashboard** — Filter status, active lists and rules loaded. iOS does not tell apps which URLs it blocked, so there are no per-block statistics
 - **Pause filtering** — 15 minutes, 1 hour, or until tomorrow
 - **Export/import** — Share your configuration as JSON
 - **Zero telemetry** — No analytics SDKs, no crash reporters, nothing phones home
@@ -128,9 +128,11 @@ Phosphor/
 | Open source | **Yes** | No | Partial | Yes | No |
 | Custom filter lists | Yes | Yes | Yes | Limited | No |
 | iOS 26 native API | **Yes** | No | No | No | No |
-| Price | Free | Freemium | Paid | Free | Freemium |
+| Price | $12.99/yr, 7 days free (App Store); free to build yourself† | Freemium | Paid | Free | Freemium |
 
 *NextDNS can use DNS-over-HTTPS without a VPN profile, but this doesn't cover all app traffic.
+
+†Building it yourself needs your own PIR server (see below) and an Apple developer account that can use the URL filter entitlement.
 
 ## Architecture
 

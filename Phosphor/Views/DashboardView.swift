@@ -1,3 +1,4 @@
+import NetworkExtension
 import PhosphorShared
 import SwiftUI
 
@@ -6,6 +7,10 @@ struct DashboardView: View {
 
     @State private var viewModel = DashboardViewModel()
     @State private var hasAppeared = false
+    @State private var showingPaywall = false
+
+    @Environment(SubscriptionManager.self) private var subscriptionManager
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = true
 
     private var isFilterRunning: Bool {
         viewModel.filterIsEnabled && viewModel.filterStatus == "Running"
@@ -16,6 +21,10 @@ struct DashboardView: View {
             ScrollView {
                 VStack(spacing: 12) {
                     header
+
+                    if !subscriptionManager.isSubscribed {
+                        premiumBanner
+                    }
 
                     if viewModel.totalBlocks == 0 {
                         emptyState
@@ -31,6 +40,9 @@ struct DashboardView: View {
             .toolbar(.hidden, for: .navigationBar)
             .refreshable { viewModel.load() }
             .task { await viewModel.observeFilterStatus() }
+            .sheet(isPresented: $showingPaywall, onDismiss: subscriptionChanged) {
+                PaywallView()
+            }
             .onAppear {
                 viewModel.load()
                 withAnimation(PhosphorTheme.dataAnimation) { hasAppeared = true }
@@ -71,6 +83,45 @@ struct DashboardView: View {
         case "Running": PhosphorTheme.phosphor
         case "Starting", "Stopping", "Stopped": PhosphorTheme.signalAmber
         default: PhosphorTheme.signalRed
+        }
+    }
+
+    // MARK: - Premium
+
+    /// Filtering needs Premium. Says plainly why protection is off and how to get it back.
+    private var premiumBanner: some View {
+        let lapsed = SubscriptionGate.isPausedForSubscription
+        return PhosphorCard(padding: 20, radius: 22) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(lapsed ? "Protection paused" : "Filtering is off")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(PhosphorTheme.ink50)
+                Text(lapsed
+                     ? "Phosphor Premium has ended, so nothing is being blocked. Renew to resume."
+                     : "Filtering comes with Phosphor Premium. New subscribers get 7 days free.")
+                    .font(.system(size: 15))
+                    .foregroundStyle(PhosphorTheme.ink300)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button(lapsed ? "Renew" : "Start free trial") { showingPaywall = true }
+                    .buttonStyle(PhosphorPrimaryButtonStyle(height: 48))
+                    .padding(.top, 6)
+            }
+        }
+    }
+
+    /// After a purchase the app re-enables a paused filter by itself. A filter that was
+    /// never set up still needs the setup screen.
+    private func subscriptionChanged() {
+        guard subscriptionManager.isSubscribed else { return }
+        Task {
+            await SubscriptionGate.run()
+            let manager = NEURLFilterManager.shared
+            try? await manager.loadFromPreferences()
+            if manager.pirServerURL == nil {
+                hasCompletedOnboarding = false
+            } else {
+                viewModel.load()
+            }
         }
     }
 
@@ -274,7 +325,7 @@ struct DashboardView: View {
                             .multilineTextAlignment(.center)
 
                         Text(isFilterRunning
-                             ? "Block counts appear here as URLs are filtered. Nothing is sent anywhere to produce them."
+                             ? "iOS checks every URL itself and does not tell apps what it blocked, so there are no block counts to show. Your lists are below."
                              : "URL filtering is not running. Turn it on to block ads, trackers and malware across every app.")
                             .font(.system(size: 15))
                             .foregroundStyle(PhosphorTheme.ink300)
@@ -357,5 +408,6 @@ private struct PeriodTile: View {
 
 #Preview {
     DashboardView(selection: .constant(.dashboard))
+        .environment(SubscriptionManager())
         .preferredColorScheme(.dark)
 }

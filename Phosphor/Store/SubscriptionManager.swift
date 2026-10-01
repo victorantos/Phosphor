@@ -109,23 +109,50 @@ final class SubscriptionManager {
     // MARK: - Subscription Status
 
     func updateSubscriptionStatus() async {
-        var foundActive = false
-
-        for await result in Transaction.currentEntitlements {
-            guard let transaction = try? checkVerified(result) else { continue }
-            if Self.productIDs.contains(transaction.productID) {
-                foundActive = true
-                activeProductID = transaction.productID
-                break
-            }
-        }
-
-        isSubscribed = foundActive
-        if !foundActive {
-            activeProductID = nil
-        }
+        let entitlement = await Self.currentEntitlement()
+        activeProductID = entitlement?.productID
+        isSubscribed = entitlement != nil || Self.assumesSubscribed
 
         Self.logger.info("Subscription status: \(self.isSubscribed ? "active" : "inactive")")
+    }
+
+    /// The transaction that gives access to Premium right now, a free trial included.
+    /// Nil once a subscription has expired or been refunded.
+    static func currentEntitlement() async -> Transaction? {
+        for await result in Transaction.currentEntitlements {
+            guard case .verified(let transaction) = result,
+                  productIDs.contains(transaction.productID),
+                  transaction.revocationDate == nil
+            else { continue }
+            return transaction
+        }
+        return nil
+    }
+
+    /// Whether Premium is active, for code that runs without the app's UI.
+    static func hasAccess() async -> Bool {
+        await currentEntitlement() != nil || assumesSubscribed
+    }
+
+    // MARK: - Development
+
+    /// Development builds started outside Xcode cannot buy anything: there is no
+    /// StoreKit configuration file, and the sandbox only sells once the Paid Apps
+    /// Agreement is active. Launching with `PHOSPHOR_ASSUME_SUBSCRIBED=1` treats the app
+    /// as subscribed until it is launched with `PHOSPHOR_ASSUME_SUBSCRIBED=0`.
+    /// Release builds ignore it.
+    static var assumesSubscribed: Bool {
+        #if DEBUG
+        let key = "debugAssumeSubscribed"
+        switch ProcessInfo.processInfo.environment["PHOSPHOR_ASSUME_SUBSCRIBED"] {
+        case "1": UserDefaults.standard.set(true, forKey: key)
+        case "0": UserDefaults.standard.removeObject(forKey: key)
+        default: break
+        }
+        return UserDefaults.standard.bool(forKey: key)
+        #else
+        return false
+        #endif
     }
 
     // MARK: - Transaction Listener

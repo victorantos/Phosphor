@@ -9,6 +9,9 @@ struct SetupPage: View {
     @Binding var hasCompletedOnboarding: Bool
     @Binding var currentPage: Int
 
+    @Environment(SubscriptionManager.self) private var subscriptionManager
+    @State private var showingPaywall = false
+
     @State private var setupState: SetupState = .ready
     @State private var errorMessage: String?
 
@@ -59,6 +62,15 @@ struct SetupPage: View {
                 actionButtons
             }
         }
+        // Filtering needs Premium, so the paywall comes first and setup carries on
+        // once a purchase or trial has started.
+        .sheet(isPresented: $showingPaywall, onDismiss: {
+            if subscriptionManager.isSubscribed {
+                Task { await enableFilter() }
+            }
+        }) {
+            PaywallView()
+        }
     }
 
     // MARK: - Copy
@@ -75,7 +87,7 @@ struct SetupPage: View {
     private var subtitleText: String {
         switch setupState {
         case .ready:
-            "iOS will ask once whether Phosphor may filter network content. Here is exactly what that grants."
+            "Filtering comes with Phosphor Premium, and new subscribers get 7 days free. iOS will then ask once whether Phosphor may filter network content. Here is exactly what that grants."
         case .enabling:
             "Starting the filter. The first time can take up to a minute."
         case .success:
@@ -196,7 +208,11 @@ struct SetupPage: View {
         case .ready, .failed:
             VStack(spacing: 4) {
                 Button("Enable filtering") {
-                    Task { await enableFilter() }
+                    if subscriptionManager.isSubscribed {
+                        Task { await enableFilter() }
+                    } else {
+                        showingPaywall = true
+                    }
                 }
                 .buttonStyle(PhosphorPrimaryButtonStyle())
 
@@ -347,5 +363,6 @@ struct SetupPage: View {
 
 #Preview {
     SetupPage(hasCompletedOnboarding: .constant(false), currentPage: .constant(2))
+        .environment(SubscriptionManager())
         .preferredColorScheme(.dark)
 }

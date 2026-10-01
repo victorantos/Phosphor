@@ -51,6 +51,12 @@ targets:
         NSPIRConfiguration:
           PIRServerURL: https://pir.phosphor.online
           PrivacyPassIssuerURL: https://pir.phosphor.online
+        # SubscriptionGate checks the subscription in the background, so the filter
+        # pauses when it ends even if the app is never opened.
+        UIBackgroundModes:
+          - fetch
+        BGTaskSchedulerPermittedIdentifiers:
+          - com.nestclaw.phosphor.subscription-check
         UILaunchScreen: {}
         UIRequiresFullScreen: false
         UIApplicationSceneManifest:
@@ -123,6 +129,9 @@ schemes:
         PhosphorFilterExtension: all
     run:
       config: Debug
+      # Local StoreKit testing: purchases and the free trial are simulated when the
+      # app is run from Xcode. Builds run any other way still use the App Store.
+      storeKitConfiguration: Phosphor/Resources/Phosphor.storekit
     profile:
       config: Release
     archive:

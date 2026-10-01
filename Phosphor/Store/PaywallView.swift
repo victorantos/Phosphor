@@ -7,7 +7,8 @@ struct PaywallView: View {
 
     /// Looked up by product ID: the group ID in App Store Connect is not the
     /// one in the local StoreKit file, so a group lookup only works in Xcode.
-    private let productIDs = [SubscriptionManager.monthlyID, SubscriptionManager.yearlyID]
+    /// The store view lists plans in this order, so annual comes first.
+    private let productIDs = [SubscriptionManager.yearlyID, SubscriptionManager.monthlyID]
     private let privacyPolicyURL = URL(string: "https://phosphor.online/privacy")!
     private let termsOfServiceURL = URL(string: "https://phosphor.online/terms")!
 
@@ -32,6 +33,9 @@ struct PaywallView: View {
                 case .success(.success):
                     Task {
                         await subscriptionManager.updateSubscriptionStatus()
+                        // The trial reminder needs permission to notify.
+                        await SubscriptionReminders.requestAuthorization()
+                        await SubscriptionGate.run()
                         dismiss()
                     }
                 default:
@@ -53,6 +57,11 @@ struct PaywallView: View {
                 }
             }
             .toolbarBackground(PhosphorTheme.ink950, for: .navigationBar)
+            .task {
+                if subscriptionManager.products.isEmpty {
+                    await subscriptionManager.loadProducts()
+                }
+            }
         }
     }
 
@@ -97,7 +106,7 @@ struct PaywallView: View {
                 FeatureItem(text: "Malware & adult content filtering")
                 FeatureItem(text: "Zero-knowledge privacy — encrypted PIR queries")
                 FeatureItem(text: "Custom filter lists & manual entries")
-                FeatureItem(text: "Real-time blocking dashboard")
+                FeatureItem(text: "A reminder 2 days before your free trial ends")
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.bottom, 20)
@@ -110,9 +119,18 @@ struct PaywallView: View {
 
     // MARK: - Subscription Terms & Legal Links
 
+    /// Prices come from the App Store so they match the user's storefront.
+    private var termsText: String {
+        var plans = "Choose Annual or Monthly."
+        if let yearly = subscriptionManager.yearlyProduct, let monthly = subscriptionManager.monthlyProduct {
+            plans = "Choose Annual (\(yearly.displayPrice) a year) or Monthly (\(monthly.displayPrice) a month)."
+        }
+        return "Phosphor Premium is an auto-renewing subscription and is required for filtering. \(plans) New subscribers get a 7-day free trial; payment is charged to your Apple ID when the trial ends, or at confirmation if you are not eligible for a trial. The subscription renews automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel any time in Settings › Apple Account › Subscriptions."
+    }
+
     private var subscriptionTerms: some View {
         VStack(spacing: 10) {
-            Text("Phosphor Premium is an auto-renewing subscription. Choose Monthly ($29.99/month) or Yearly ($249.99/year). Each plan includes a 1-week free trial. Payment is charged to your Apple ID at confirmation. The subscription renews automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in App Store settings.")
+            Text(termsText)
                 .font(.system(size: 12))
                 .foregroundStyle(PhosphorTheme.ink400)
                 .multilineTextAlignment(.center)

@@ -35,6 +35,7 @@ struct PhosphorApp: App {
                             if isSubscribed {
                                 showPaywall = false
                             }
+                            Task { await SubscriptionGate.run() }
                         }
                 }
             }
@@ -43,6 +44,8 @@ struct PhosphorApp: App {
                 guard phase == .active else { return }
                 Task {
                     await FilterPause.reconcile()
+                    await subscriptionManager.updateSubscriptionStatus()
+                    await SubscriptionGate.run()
                     await FilterParsing.updateSavedConfiguration()
                     await FilterRefresher.restartIfStopped()
                     await skipOnboardingIfFilterIsRunning()
@@ -53,6 +56,9 @@ struct PhosphorApp: App {
             // A light rendering would have nothing for the phosphor to glow against.
             .preferredColorScheme(.dark)
             .tint(PhosphorTheme.phosphor)
+        }
+        .backgroundTask(.appRefresh(SubscriptionGate.refreshTaskID)) {
+            await SubscriptionGate.run()
         }
     }
 

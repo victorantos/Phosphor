@@ -62,6 +62,10 @@ final class DashboardViewModel {
     }
 
     private func apply(_ status: NEURLFilterManager.Status) {
+        if status != .running, SubscriptionGate.isPausedForSubscription {
+            filterStatus = "Paused"
+            return
+        }
         switch status {
         case .running: filterStatus = "Running"
         case .starting: filterStatus = "Starting"
