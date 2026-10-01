@@ -19,6 +19,7 @@ struct PaywallView: View {
     @State private var isPurchasing = false
     @State private var isRestoring = false
     @State private var errorMessage: String?
+    @State private var hasLoaded = false
 
     private let privacyPolicyURL = URL(string: "https://phosphor.online/privacy")!
     private let termsOfServiceURL = URL(string: "https://phosphor.online/terms")!
@@ -61,12 +62,20 @@ struct PaywallView: View {
     }
 
     private func load() async {
-        if subscriptionManager.products.isEmpty {
+        hasLoaded = false
+        // Retry also when only one plan came back: a plan can be missing for a while
+        // after it changes in App Store Connect.
+        if subscriptionManager.yearlyProduct == nil || subscriptionManager.monthlyProduct == nil {
             await subscriptionManager.loadProducts()
         }
         for product in subscriptionManager.products {
             trialEligible[product.id] = await product.subscription?.isEligibleForIntroOffer ?? false
         }
+        // Default to yearly, or to whichever plan is available.
+        if selected == nil, let first = yearly ?? monthly {
+            selectedID = first.id
+        }
+        hasLoaded = true
     }
 
     /// Warm black with a single bloom behind the mark — the light is the subject.
@@ -120,25 +129,31 @@ struct PaywallView: View {
 
     private var purchasePanel: some View {
         VStack(spacing: 12) {
-            if let yearly, let monthly {
+            if yearly != nil || monthly != nil {
+                // Each plan is shown on its own, so one that is temporarily missing
+                // from the store does not hide the other.
                 HStack(spacing: 10) {
-                    PlanCard(
-                        title: "Yearly",
-                        price: "\(yearly.displayPrice)/year",
-                        detail: "\(Self.perMonth(yearly)) a month",
-                        badge: Self.savings(yearly: yearly, monthly: monthly).map { "Save \($0)%" },
-                        isSelected: selectedID == yearly.id
-                    ) { selectedID = yearly.id }
+                    if let yearly {
+                        PlanCard(
+                            title: "Yearly",
+                            price: "\(yearly.displayPrice)/year",
+                            detail: "\(Self.perMonth(yearly)) a month",
+                            badge: monthly.flatMap { Self.savings(yearly: yearly, monthly: $0) }.map { "Save \($0)%" },
+                            isSelected: selectedID == yearly.id
+                        ) { selectedID = yearly.id }
+                    }
 
-                    PlanCard(
-                        title: "Monthly",
-                        price: "\(monthly.displayPrice)/month",
-                        detail: "Billed monthly",
-                        badge: nil,
-                        isSelected: selectedID == monthly.id
-                    ) { selectedID = monthly.id }
+                    if let monthly {
+                        PlanCard(
+                            title: "Monthly",
+                            price: "\(monthly.displayPrice)/month",
+                            detail: "Billed monthly",
+                            badge: nil,
+                            isSelected: selectedID == monthly.id
+                        ) { selectedID = monthly.id }
+                    }
                 }
-            } else if subscriptionManager.purchaseError != nil {
+            } else if hasLoaded || subscriptionManager.purchaseError != nil {
                 VStack(spacing: 8) {
                     Text("Plans could not be loaded.")
                         .font(.system(size: 15))

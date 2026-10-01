@@ -43,7 +43,7 @@ targets:
         # Pinned here so `xcodegen generate` cannot silently reset the build
         # number — it defaults to 1 for anything project.yml does not declare.
         CFBundleShortVersionString: "1.0"
-        CFBundleVersion: "4"
+        CFBundleVersion: "5"
         # Supplied by Config/Secrets.xcconfig (gitignored).
         PIRAuthenticationToken: $(PIR_AUTH_TOKEN)
         # Must match PIRConfiguration.serverURL. iOS 27.3 rejects a filter whose
@@ -102,7 +102,7 @@ targets:
         CFBundlePackageType: "XPC!"
         # Must match the app's version and build number.
         CFBundleShortVersionString: "1.0"
-        CFBundleVersion: "4"
+        CFBundleVersion: "5"
         EXAppExtensionAttributes:
           EXExtensionPointIdentifier: com.apple.networkextension.url-filter-control
         # Required from iOS 27.3: the PIR URLs must be declared statically.
