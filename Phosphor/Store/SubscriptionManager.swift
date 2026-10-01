@@ -121,12 +121,26 @@ final class SubscriptionManager {
     static func currentEntitlement() async -> Transaction? {
         for await result in Transaction.currentEntitlements {
             guard case .verified(let transaction) = result,
-                  productIDs.contains(transaction.productID),
-                  transaction.revocationDate == nil
+                  productIDs.contains(transaction.productID)
             else { continue }
-            return transaction
+            logger.info("Entitlement \(transaction.id) \(transaction.productID, privacy: .public): expires \(transaction.expirationDate?.description ?? "never", privacy: .public), revoked \(transaction.revocationDate != nil)")
+            if grantsAccess(transaction) { return transaction }
+        }
+        // After a refund, currentEntitlements was seen to keep returning the refunded
+        // purchase and not a newer one (StoreKit testing, iOS 27). The latest
+        // transaction for each plan is checked as well.
+        for productID in productIDs {
+            guard let result = await Transaction.latest(for: productID),
+                  case .verified(let transaction) = result
+            else { continue }
+            logger.info("Latest \(transaction.id) \(productID, privacy: .public): expires \(transaction.expirationDate?.description ?? "never", privacy: .public), revoked \(transaction.revocationDate != nil)")
+            if grantsAccess(transaction) { return transaction }
         }
         return nil
+    }
+
+    private static func grantsAccess(_ transaction: Transaction) -> Bool {
+        transaction.revocationDate == nil && (transaction.expirationDate ?? .distantFuture) > .now
     }
 
     /// Whether Premium is active, for code that runs without the app's UI.

@@ -111,6 +111,17 @@ it is the default), monthly $1.99, 7-day free trial on both, no lifetime plan.
 - [x] Gate verified on the iPhone 11 (2026-10-01): with no subscription the filter
       paused and xvideos.com was allowed; with the override it resumed and blocked again.
 - [x] Annual purchase with local StoreKit switched the filter back on (2026-10-01).
+- [x] Refund with local StoreKit: on reopening, the app paused the filter and showed
+      "Protection paused" (2026-10-01).
+- [x] Buying again after the refund: StoreKit's `currentEntitlements` kept returning
+      the refunded purchase, so the app stayed paused although the purchase succeeded.
+      `SubscriptionManager.currentEntitlement()` now also checks `Transaction.latest(for:)`
+      per plan; after that the Renew card went and the filter turned back on
+      (2026-10-01). The paywall now closes only when access is really active.
+- [ ] Cancel (auto-renew off) and let the period run out: the user saw nothing happen
+      after cancelling with "1 Renewal Every 5 Minutes"; unclear whether the period had
+      ended and the app was reopened. Retest, watching the console for
+      `Subscription status` and `SubscriptionGate`.
 - [ ] Reminders and the "Protection paused" path with local StoreKit. Use the rate
       "1 Renewal Every 5 Minutes" (set in `Phosphor.storekit`); "every 2 seconds" renews
       too fast to switch auto-renew off. The reminder comes at 2/7 of the period when

@@ -1,3 +1,4 @@
+import os
 import StoreKit
 import SwiftUI
 
@@ -7,6 +8,8 @@ import SwiftUI
 /// auto-renewal terms, Restore, and working links to the terms and privacy policy;
 /// all of them are here.
 struct PaywallView: View {
+    private static let logger = Logger(subsystem: "com.nestclaw.phosphor", category: "Paywall")
+
     @Environment(SubscriptionManager.self) private var subscriptionManager
     @Environment(\.dismiss) private var dismiss
     @Environment(\.purchase) private var purchase
@@ -277,13 +280,21 @@ struct PaywallView: View {
         do {
             switch try await purchase(selected) {
             case .success(.verified(let transaction)):
+                Self.logger.info("Purchase returned transaction \(transaction.id) for \(transaction.productID, privacy: .public), expires \(transaction.expirationDate?.description ?? "never", privacy: .public), revoked: \(transaction.revocationDate != nil)")
                 await transaction.finish()
                 await subscriptionManager.updateSubscriptionStatus()
+                // StoreKit can report success with a transaction that grants nothing,
+                // such as an earlier refunded one. Only close once access is real.
+                guard subscriptionManager.isSubscribed else {
+                    errorMessage = "The purchase did not complete. Please try again, or use Restore."
+                    return
+                }
                 // The trial reminder needs permission to notify.
                 await SubscriptionReminders.requestAuthorization()
                 await SubscriptionGate.run()
                 dismiss()
-            case .success(.unverified):
+            case .success(.unverified(_, let error)):
+                Self.logger.error("Purchase unverified: \(error.localizedDescription, privacy: .public)")
                 errorMessage = "The purchase could not be verified. Try Restore."
             case .pending:
                 errorMessage = "The purchase is waiting for approval."
@@ -293,6 +304,7 @@ struct PaywallView: View {
                 break
             }
         } catch {
+            Self.logger.error("Purchase failed: \(error.localizedDescription, privacy: .public)")
             errorMessage = "The purchase did not go through. Please try again."
         }
     }
