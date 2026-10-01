@@ -7,16 +7,15 @@ and builds the app. On iOS 27 subdomains of listed domains are now blocked too.
 
 ## Next session: start here
 
-1. Review and merge the pull request from `redesign` into `main`.
-2. App Store items below; most are in App Store Connect.
+1. Test the paywall and trial with local StoreKit (see Subscription below).
+2. App Store Connect: change the prices (see App Store).
+3. Commit the subscription gating, new prices and site copy (uncommitted on `main`).
 
 ## Where things are
 
-- Branch `redesign` holds everything: the filter fixes from `fix/url-filter`, `main`
-  merged in, the app redesign, and iOS 27 parent-domain matching. Pull request to
-  `main` opened 2026-10-01.
-- `fix/url-filter` holds the fixes alone (plus the merge of `main`) and can be deleted
-  once the pull request is merged.
+- Everything up to the redesign and iOS 27 parent-domain matching is on `main` (pull
+  request #3, merged 2026-10-01). `fix/url-filter` and `redesign` can be deleted.
+- Launch posts for after approval are in `marketing/launch/` (git-ignored, local only).
 - `build/server-scripts/` (git-ignored) holds the server scripts, the token key patch,
   and `LiveProbeTests.swift` for querying the live PIR server from a Mac.
 - `build/pmd` (git-ignored) is a venv with `pymobiledevice3` for reading device logs
@@ -36,11 +35,9 @@ and builds the app. On iOS 27 subdomains of listed domains are now blocked too.
 
 ## Verify on a device
 
-- [ ] The filter comes back after the token key change once the app is opened. On the
-      iPhone 15 it did (2026-09-30), but through the parsing configuration save, not
-      `FilterRefresher.restartIfStopped`: the status read `invalid`, not `stopped`.
-      The iPhone 11 reached `running` about 6 minutes after a new build was installed
-      (2026-10-01), so `restartIfStopped` is still untested on both phones.
+- [x] `FilterRefresher.restartIfStopped` restarted a stopped filter on the iPhone 11
+      (2026-10-01). Opening the app again during the minutes the filter takes to start
+      restarted it each time and kept it down, so restarts now wait 10 minutes.
 - [x] Clean install, as a reviewer would do it: delete the app, install, enable
       filtering, open an adult site and bbc.co.uk in Safari. Done on both phones
       2026-10-01: fresh import of all five lists (159,416 prefilter
@@ -54,7 +51,10 @@ and builds the app. On iOS 27 subdomains of listed domains are now blocked too.
 - [x] "Adult was off by default": not reproduced. After deleting the app on both phones
       (2026-10-01) the app group was empty and every list, Adult included, was imported
       switched on.
-- [ ] Onboarding is skipped when the filter is already running.
+- [x] Onboarding is skipped when the filter is already running. It never was: the
+      status reads `invalid` right after loading and `starting` for minutes after an
+      update. Fixed 2026-10-01 to wait for the status and accept `starting`; verified on
+      both phones.
 - [ ] The paywall shows the monthly and yearly plans from App Store Connect.
 - [x] Parent-domain matching on iOS 27.0 (2026-09-30): the probe denied made-up
       subdomains of listed domains (`phosphortest.doubleclick.net`,
@@ -86,6 +86,38 @@ and builds the app. On iOS 27 subdomains of listed domains are now blocked too.
       without `www.`, `Tools/build-pir-database.py` keeps the server database in step.
       Coverage of 30 common ad and tracker hosts went from 3 to 26.
 
+## Subscription
+
+Filtering requires Phosphor Premium (decided 2026-10-01): annual $12.99 (listed first, so
+it is the default), monthly $1.99, 7-day free trial on both, no lifetime plan.
+
+- `SubscriptionGate` switches the filter off when there is no subscription or trial and
+  back on after a purchase. It runs when the app becomes active, after a purchase, and
+  from a background app refresh task (`com.nestclaw.phosphor.subscription-check`) so it
+  also catches people who never open the app.
+- `SubscriptionReminders` (local notifications): 2 days before a trial ends, with the
+  renewal price; 2 days before a cancelled subscription ends; "Protection paused" when it
+  ends. Permission is asked right after a purchase.
+- Setup's "Enable filtering" opens the paywall first. The dashboard shows "Protection
+  paused" or "Filtering is off" with a button to the paywall.
+- Dev builds: launch with `PHOSPHOR_ASSUME_SUBSCRIBED=1` to treat the app as subscribed
+  (persists; `=0` turns it off). Both test phones have it on (2026-10-01). Release builds
+  ignore it.
+- Local StoreKit testing: the Xcode scheme uses `Phosphor/Resources/Phosphor.storekit`
+  when run with ⌘R. Set Editor › Subscription Renewal Rate to "1 second = 1 day" to see
+  a trial end in 7 seconds; Debug › StoreKit › Manage Transactions to expire or delete.
+  Turn the debug override off first, or the gate never pauses.
+
+- [x] Gate verified on the iPhone 11 (2026-10-01): with no subscription the filter
+      paused and xvideos.com was allowed; with the override it resumed and blocked again.
+- [ ] Trial purchase, reminders and the "Protection paused" path with local StoreKit.
+- [ ] Background refresh actually pauses a lapsed filter without the app being opened.
+      Hard to force; Xcode's Debug › Simulate Background Fetch helps.
+- [ ] The dashboard has no block counts: nothing in the app records them and iOS does
+      not report blocks to apps (iOS 27's `reportEndpoint` sends reports to a server).
+      The "Real-time blocking dashboard" claim was removed from the paywall, site and
+      README. Decide what the dashboard should show instead of the empty block stats.
+
 ## Server
 
 - [x] The PIR service keeps its Privacy Pass token key across restarts: patched with
@@ -109,6 +141,12 @@ and builds the app. On iOS 27 subdomains of listed domains are now blocked too.
 - [ ] Compliance Screening form in App Store Connect.
 - [ ] Both subscriptions are "Developer Rejected" and have to be added to the next
       submission.
+- [ ] Change the prices: yearly (`com.nestclaw.phosphor.yearly`) $12.99, monthly
+      (`com.nestclaw.phosphor.monthly`) $1.99, each with a 1-week free trial as the
+      introductory offer. Check the App Store description and promotional text for old
+      prices.
+- [ ] App Review note: filtering requires a subscription; start the free trial with
+      the sandbox account, then allow the filter when iOS asks.
 - [ ] Apple's relay onboarding for NE URL Filter configuration
       `b2f98894-6a27-4a1d-b050-79e23fd81022` was "pending" on 2026-09-29. App Store and
       TestFlight builds reach the PIR server only through the relay.
