@@ -1,10 +1,28 @@
 # Phosphor
 
+![App Store: pending review](https://img.shields.io/badge/App%20Store-pending%20review-orange?logo=apple) ![iOS 26+](https://img.shields.io/badge/iOS-26%2B-black) ![License: MIT](https://img.shields.io/badge/license-MIT-green)
+
 **Privacy-preserving, system-wide URL filtering for iOS 26 — powered by Apple's `NEURLFilterManager` API.**
 
 Phosphor blocks ads, trackers, malware, and adult content across Safari, in-app browsers, and URLSession-based apps. It uses Apple's Private Information Retrieval (PIR) with homomorphic encryption so **the app never sees the URLs you visit**.
 
-> This is believed to be the first consumer app built on `NEURLFilterManager`, introduced at WWDC25.
+<p align="center">
+  <img src="screenshots/readme/01-welcome.png" width="200" alt="Welcome screen: blocks ads everywhere, sees nothing">
+  <img src="screenshots/readme/02-setup.png" width="200" alt="Setup: what turning on the filter grants">
+  <img src="screenshots/readme/03-lists.png" width="200" alt="Lists: built-in filter lists and custom lists">
+  <img src="screenshots/readme/04-settings.png" width="200" alt="Settings: pause filtering with one tap">
+</p>
+
+## Status
+
+Phosphor is **not on the App Store yet**. Version 1.0 is in TestFlight and is waiting
+for Apple to finish onboarding its URL filter configuration onto the Oblivious HTTP
+relay; App Store and TestFlight builds can only reach the PIR server through that
+relay. The app will be submitted for review once filtering works on a TestFlight build.
+Development builds talk to the server directly and work today.
+
+On the App Store it will be a subscription (7 days free, then $12.99 a year or $1.99 a
+month) that pays for the PIR server. The code is MIT-licensed and you can build it yourself.
 
 ## How It Works
 
@@ -15,14 +33,14 @@ URL Request → On-Device Bloom Filter → (miss) → Allow immediately
                                                → Block or Allow
 ```
 
-1. **Bloom filter (on-device):** A compact bit array instantly checks if a URL *might* be blocked. ~99.9% of URLs are cleared here with zero network traffic.
+1. **Bloom filter (on-device):** A compact bit array instantly checks if a URL *might* be blocked. Most URLs are cleared here with zero network traffic.
 2. **PIR query (encrypted):** For Bloom filter matches, the system sends a homomorphically encrypted query to the PIR server. The server processes the query *without decrypting it*.
 3. **OHTTP relay (anonymous):** Queries route through Apple's Oblivious HTTP relay. Your IP is hidden from the PIR server; query content is hidden from Apple. Neither party sees both.
 4. **Result:** The encrypted response is decrypted on-device. The app never learns which URL was checked.
 
 ## Features
 
-- **4 built-in filter lists** — Ads (Peter Lowe), Trackers (EasyPrivacy), Malware (URLhaus), Adult Content (StevenBlack) — 123K+ domains
+- **5 built-in filter lists** — Ads (Peter Lowe, StevenBlack hosts), Trackers (EasyPrivacy), Malware (URLhaus), Adult Content (StevenBlack) — 159K+ domains
 - **Custom lists** — Add any remote hosts-format or domain list URL
 - **Manual entries** — Block or allow individual URLs/domains
 - **Dashboard** — Filter status, active lists and rules loaded. iOS does not tell apps which URLs it blocked, so there are no per-block statistics
