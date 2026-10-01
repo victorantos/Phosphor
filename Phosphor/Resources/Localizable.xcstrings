@@ -4,9 +4,6 @@
     "·" : {
 
     },
-    "%@" : {
-
-    },
     "%@ active list%@" : {
       "localizations" : {
         "en" : {
@@ -27,16 +24,16 @@
         }
       }
     },
-    "%@ rules" : {
-
-    },
     "%@ rules loaded" : {
 
     },
-    "14-Day Trend" : {
+    "Active" : {
 
     },
-    "Add filter lists to start blocking ads, trackers, and malware." : {
+    "Add a filter list" : {
+
+    },
+    "Add a list to start blocking ads, trackers and malware." : {
 
     },
     "Allow" : {
@@ -45,40 +42,52 @@
     "Block" : {
 
     },
-    "Blocked Today" : {
+    "Blocked today" : {
 
     },
-    "By Category" : {
+    "Blocks ads everywhere." : {
 
     },
-    "Categories" : {
+    "Changes apply to an app the next time it is opened. Close Safari and open it again to see them there." : {
 
     },
-    "Enable Filtering" : {
+    "Each party in the chain holds one half of the picture and cannot get the other. This is arrangement, not policy." : {
 
     },
-    "Filtering Paused" : {
-
-    },
-    "Get Started" : {
-
-    },
-    "License" : {
-
-    },
-    "MIT License — free to use, modify, and distribute." : {
-
-    },
-    "Next" : {
+    "Lists" : {
 
     },
     "No data yet" : {
 
     },
-    "Phosphor" : {
+    "No filter lists" : {
 
     },
-    "Privacy-preserving URL filtering for iOS" : {
+    "Nobody sees both" : {
+
+    },
+    "Nobody sees both." : {
+
+    },
+    "Not now" : {
+
+    },
+    "Paste a hosts-format or domain-list URL" : {
+
+    },
+    "Pause filtering" : {
+
+    },
+    "phosphor" : {
+
+    },
+    "PHOSPHOR PREMIUM" : {
+
+    },
+    "Phosphor Premium is an auto-renewing subscription. Choose Monthly ($29.99/month) or Yearly ($249.99/year). Each plan includes a 1-week free trial. Payment is charged to your Apple ID at confirmation. The subscription renews automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel anytime in App Store settings." : {
+
+    },
+    "Privacy-preserving, system-wide URL filtering for iOS 26." : {
 
     },
     "Refresh the list to download rules." : {
@@ -87,19 +96,31 @@
     "Rules" : {
 
     },
-    "Skip for Now" : {
+    "Sees nothing." : {
+
+    },
+    "Settings" : {
+
+    },
+    "Starting the filter…" : {
+
+    },
+    "System-wide filtering for iOS 26 that keeps the URLs you visit encrypted — even from us." : {
+
+    },
+    "The app, the filter extension and the shared Bloom filter are MIT-licensed — free to use, modify and distribute. The Phosphor name and mark are proprietary." : {
 
     },
     "The URL should point to a hosts-format or plain domain list (one domain per line)." : {
 
     },
+    "This is not a policy promise — it is how the pieces are arranged. Each party in the chain holds one half of the picture and cannot get the other." : {
+
+    },
     "threats stopped" : {
 
     },
-    "Toggle entire categories on or off. Individual lists can be managed in the Lists tab." : {
-
-    },
-    "URLs will not be filtered during the pause period." : {
+    "Turn filtering on. Keep your history yours." : {
 
     },
     "Version %@ (%@)" : {
@@ -111,6 +132,9 @@
           }
         }
       }
+    },
+    "You can pause or switch this off any time in Settings. If the filter ever shows “Invalid”, reinstalling fixes it." : {
+
     }
   },
   "version" : "1.0"

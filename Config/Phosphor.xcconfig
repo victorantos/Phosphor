@@ -1,0 +1,6 @@
+// Build settings for the Phosphor app target.
+// Placeholder default so the project builds without Secrets.xcconfig; the app
+// refuses to enable the filter until a real token is supplied.
+PIR_AUTH_TOKEN = replace-me
+
+#include? "Secrets.xcconfig"

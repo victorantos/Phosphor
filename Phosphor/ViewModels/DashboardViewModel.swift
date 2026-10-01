@@ -41,17 +41,34 @@ final class DashboardViewModel {
             try await manager.loadFromPreferences()
             filterIsEnabled = manager.isEnabled
             let status = await manager.status
-            switch status {
-            case .running: filterStatus = "Running"
-            case .starting: filterStatus = "Starting"
-            case .stopped: filterStatus = "Stopped"
-            case .stopping: filterStatus = "Stopping"
-            case .invalid: filterStatus = "Not Configured"
-            @unknown default: filterStatus = "Unknown"
-            }
+            apply(status)
+            let reason = await manager.lastDisconnectError
+            Self.logger.info("Filter status: \(self.filterStatus, privacy: .public), enabled: \(self.filterIsEnabled), last error: \(reason.map { String(describing: $0) } ?? "none", privacy: .public), server: \(manager.pirServerURL?.host() ?? "nil", privacy: .public)")
         } catch {
+            Self.logger.error("Failed to load filter status: \(error.localizedDescription, privacy: .public)")
             filterIsEnabled = false
             filterStatus = "Not Configured"
+        }
+    }
+
+    /// Keeps the status current while the dashboard is on screen. The filter can
+    /// take a while to go from starting to running, so one read at load is not enough.
+    func observeFilterStatus() async {
+        for await status in NEURLFilterManager.shared.handleStatusChange() {
+            apply(status)
+            filterIsEnabled = NEURLFilterManager.shared.isEnabled
+            Self.logger.info("Filter status changed: \(self.filterStatus, privacy: .public)")
+        }
+    }
+
+    private func apply(_ status: NEURLFilterManager.Status) {
+        switch status {
+        case .running: filterStatus = "Running"
+        case .starting: filterStatus = "Starting"
+        case .stopped: filterStatus = FilterPause.isActive ? "Paused" : "Stopped"
+        case .stopping: filterStatus = "Stopping"
+        case .invalid: filterStatus = "Not Configured"
+        @unknown default: filterStatus = "Unknown"
         }
     }
 

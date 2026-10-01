@@ -27,6 +27,15 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSPIRConfiguration</key>
+	<dict>
+		<key>PIRServerURL</key>
+		<string>https://pir.phosphor.online</string>
+		<key>PrivacyPassIssuerURL</key>
+		<string>https://pir.phosphor.online</string>
+	</dict>
+	<key>PIRAuthenticationToken</key>
+	<string>$(PIR_AUTH_TOKEN)</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

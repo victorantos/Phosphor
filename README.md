@@ -25,7 +25,7 @@ URL Request → On-Device Bloom Filter → (miss) → Allow immediately
 - **4 built-in filter lists** — Ads (Peter Lowe), Trackers (EasyPrivacy), Malware (URLhaus), Adult Content (StevenBlack) — 123K+ domains
 - **Custom lists** — Add any remote hosts-format or domain list URL
 - **Manual entries** — Block or allow individual URLs/domains
-- **Dashboard** — Block stats with Swift Charts: donut chart by category, 14-day trend line, today/week/month counters
+- **Dashboard** — Block stats in the Phosphor design system: a hero count for today, week/month/all-time tiles, single-hue category meters and a 14-day trend
 - **Pause filtering** — 15 minutes, 1 hour, or until tomorrow
 - **Export/import** — Share your configuration as JSON
 - **Zero telemetry** — No analytics SDKs, no crash reporters, nothing phones home
@@ -68,6 +68,17 @@ Before building on a device, you need:
 3. **Bundle identifiers** — Update `project.yml` with your real bundle ID prefix and team ID
 
 > **Note:** NetworkExtension entitlements require an **organization** Apple Developer account, not an individual one. Simulator support for NetworkExtension is limited — test on a real device.
+
+### Secrets
+
+Secrets are kept out of the repository. Copy the example files and fill in your own values:
+
+```bash
+cp Config/Secrets.example.xcconfig Config/Secrets.xcconfig
+cp PIRServer/data/server-config.example.json PIRServer/data/server-config.json
+```
+
+`PIR_AUTH_TOKEN` in `Secrets.xcconfig` must match a token listed in your PIR server config. The token must be valid base64, for example 64 hex characters from `openssl rand -hex 32`; iOS silently ignores a token it cannot decode and the filter never starts. Re-run `xcodegen generate` after creating the file. Without it the app still builds, but it won't enable the filter.
 
 ### PIR Server
 

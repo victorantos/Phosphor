@@ -19,8 +19,11 @@ struct FilterListDetailView: View {
             infoSection
             rulesSection
         }
+        .scrollContentBackground(.hidden)
+        .background(PhosphorTheme.ink950.ignoresSafeArea())
         .navigationTitle(list.name)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(PhosphorTheme.ink950, for: .navigationBar)
         .searchable(text: $searchText, prompt: "Search \(rules.count.formatted()) rules")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -77,14 +80,15 @@ struct FilterListDetailView: View {
             LabeledContent("Status") {
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(list.isEnabled ? Color.green : Color.secondary)
+                        .fill(list.isEnabled ? PhosphorTheme.phosphor : PhosphorTheme.ink600)
                         .frame(width: 8, height: 8)
                         .accessibilityHidden(true)
                     Text(list.isEnabled ? "Enabled" : "Disabled")
-                        .foregroundStyle(list.isEnabled ? Color.primary : .secondary)
+                        .foregroundStyle(list.isEnabled ? PhosphorTheme.ink50 : PhosphorTheme.ink400)
                 }
             }
         }
+        .listRowBackground(PhosphorTheme.ink900)
     }
 
     // MARK: - Rules Section
@@ -107,7 +111,7 @@ struct FilterListDetailView: View {
                 ForEach(filteredRules) { rule in
                     HStack {
                         Image(systemName: rule.action == .block ? "xmark.circle.fill" : "checkmark.circle.fill")
-                            .foregroundStyle(rule.action == .block ? .red : .green)
+                            .foregroundStyle(rule.action == .block ? PhosphorTheme.signalRed : PhosphorTheme.phosphor)
                             .font(.caption)
                             .accessibilityHidden(true)
 
@@ -138,6 +142,7 @@ struct FilterListDetailView: View {
                 Text("Rules")
             }
         }
+        .listRowBackground(PhosphorTheme.ink900)
     }
 }
 

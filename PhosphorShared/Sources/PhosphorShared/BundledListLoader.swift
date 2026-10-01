@@ -14,7 +14,7 @@ struct BundledListManifestEntry: Codable, Sendable {
 /// on first launch. Subsequent launches skip import unless a version bump occurs.
 public final class BundledListLoader: Sendable {
     /// Increment this when bundled lists are updated to trigger a re-import.
-    public static let bundledListVersion = 1
+    public static let bundledListVersion = 3
 
     private static let versionKey = "bundledListVersion"
     private let store: FilterListStore
@@ -37,9 +37,27 @@ public final class BundledListLoader: Sendable {
             logger.info("Bundled lists already imported (v\(Self.bundledListVersion))")
             return
         }
+        let stored = PhosphorConstants.sharedDefaults?.integer(forKey: Self.versionKey) ?? 0
         try importBundledLists(from: bundle)
+        if stored == 1 {
+            try enableAllBundledLists()
+        }
         PhosphorConstants.sharedDefaults?.set(Self.bundledListVersion, forKey: Self.versionKey)
         logger.info("Bundled lists imported successfully")
+    }
+
+    /// Version 1 imported the adult content list switched off. Every bundled list is
+    /// now on by default, so switch on the ones an earlier import left off.
+    private func enableAllBundledLists() throws {
+        let lists = try store.loadLists().map { list in
+            var list = list
+            if list.source != .manual {
+                list.isEnabled = true
+            }
+            return list
+        }
+        try store.saveLists(lists)
+        logger.info("Enabled all bundled filter lists")
     }
 
     private func importBundledLists(from bundle: Bundle) throws {
@@ -64,8 +82,11 @@ public final class BundledListLoader: Sendable {
         let entries = try JSONDecoder().decode([BundledListManifestEntry].self, from: data)
 
         var lists: [FilterList] = []
+        // A later version of the bundle can add lists. Lists already imported are left
+        // alone so that switching one off survives an update.
+        let existingNames = Set((try? store.loadLists())?.map(\.name) ?? [])
 
-        for entry in entries {
+        for entry in entries where !existingNames.contains(entry.name) {
             let resourceName = (entry.filename as NSString).deletingPathExtension
             let resourceExt = (entry.filename as NSString).pathExtension
 
@@ -88,7 +109,7 @@ public final class BundledListLoader: Sendable {
                 name: entry.name,
                 category: entry.category,
                 source: source,
-                isEnabled: entry.category != .adultContent, // Adult content off by default
+                isEnabled: true,
                 lastUpdated: .now,
                 ruleCount: domains.count
             )

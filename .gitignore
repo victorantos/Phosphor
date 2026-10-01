@@ -55,3 +55,7 @@ PIRServer/certs/
 PIRServer/data/processed/
 PIRServer/data/url-database.txtpb
 PIRServer/privacy-gateway-server-go/
+
+# Secrets — copy the *.example files and fill in your own values
+Config/Secrets.xcconfig
+PIRServer/data/server-config.json

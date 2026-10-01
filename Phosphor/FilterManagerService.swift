@@ -92,6 +92,7 @@ final class FilterManagerService {
         manager.isEnabled = true
         manager.shouldFailClosed = false
         manager.prefilterFetchInterval = 86400 // 24 hours
+        FilterParsing.apply(to: manager)
 
         try await manager.saveToPreferences()
 
