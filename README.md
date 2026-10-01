@@ -25,7 +25,7 @@ URL Request → On-Device Bloom Filter → (miss) → Allow immediately
 - **4 built-in filter lists** — Ads (Peter Lowe), Trackers (EasyPrivacy), Malware (URLhaus), Adult Content (StevenBlack) — 123K+ domains
 - **Custom lists** — Add any remote hosts-format or domain list URL
 - **Manual entries** — Block or allow individual URLs/domains
-- **Dashboard** — Block stats with Swift Charts: donut chart by category, 14-day trend line, today/week/month counters
+- **Dashboard** — Block stats in the Phosphor design system: a hero count for today, week/month/all-time tiles, single-hue category meters and a 14-day trend
 - **Pause filtering** — 15 minutes, 1 hour, or until tomorrow
 - **Export/import** — Share your configuration as JSON
 - **Zero telemetry** — No analytics SDKs, no crash reporters, nothing phones home

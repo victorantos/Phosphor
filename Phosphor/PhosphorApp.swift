@@ -48,6 +48,10 @@ struct PhosphorApp: App {
                     await FilterProbe.runIfRequested()
                 }
             }
+            // Phosphor is a dark-only brand: warm black with one light on it.
+            // A light rendering would have nothing for the phosphor to glow against.
+            .preferredColorScheme(.dark)
+            .tint(PhosphorTheme.phosphor)
         }
     }
 

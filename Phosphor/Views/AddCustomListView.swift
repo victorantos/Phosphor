@@ -29,6 +29,7 @@ struct AddCustomListView: View {
                         .autocorrectionDisabled()
                         .accessibilityLabel("List URL")
                 }
+                .listRowBackground(PhosphorTheme.ink900)
 
                 Section("Category") {
                     Picker("Category", selection: $category) {
@@ -40,15 +41,20 @@ struct AddCustomListView: View {
                     .pickerStyle(.inline)
                     .labelsHidden()
                 }
+                .listRowBackground(PhosphorTheme.ink900)
 
                 Section {
                     Text("The URL should point to a hosts-format or plain domain list (one domain per line).")
                         .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(PhosphorTheme.ink400)
                 }
+                .listRowBackground(PhosphorTheme.ink900)
             }
+            .scrollContentBackground(.hidden)
+            .background(PhosphorTheme.ink950.ignoresSafeArea())
             .navigationTitle("Add Remote List")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(PhosphorTheme.ink950, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -69,6 +75,8 @@ struct AddCustomListView: View {
             }
         }
         .presentationDetents([.medium, .large])
+        .presentationBackground(PhosphorTheme.ink950)
+        .tint(PhosphorTheme.phosphor)
     }
 }
 
@@ -94,6 +102,7 @@ struct AddManualEntryView: View {
                         .autocorrectionDisabled()
                         .accessibilityLabel("URL or domain to filter")
                 }
+                .listRowBackground(PhosphorTheme.ink900)
 
                 Section("Action") {
                     Picker("Action", selection: $action) {
@@ -102,6 +111,7 @@ struct AddManualEntryView: View {
                     }
                     .pickerStyle(.segmented)
                 }
+                .listRowBackground(PhosphorTheme.ink900)
 
                 Section("Category") {
                     Picker("Category", selection: $category) {
@@ -113,9 +123,13 @@ struct AddManualEntryView: View {
                     .pickerStyle(.inline)
                     .labelsHidden()
                 }
+                .listRowBackground(PhosphorTheme.ink900)
             }
+            .scrollContentBackground(.hidden)
+            .background(PhosphorTheme.ink950.ignoresSafeArea())
             .navigationTitle("Add Entry")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(PhosphorTheme.ink950, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -135,6 +149,8 @@ struct AddManualEntryView: View {
             }
         }
         .presentationDetents([.medium, .large])
+        .presentationBackground(PhosphorTheme.ink950)
+        .tint(PhosphorTheme.phosphor)
     }
 }
 

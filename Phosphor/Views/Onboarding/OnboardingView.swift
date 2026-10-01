@@ -6,21 +6,12 @@ struct OnboardingView: View {
 
     var body: some View {
         TabView(selection: $currentPage) {
-            WelcomePage(currentPage: $currentPage)
-                .tag(0)
-
-            PrivacyPage(currentPage: $currentPage)
-                .tag(1)
-
-            SetupPage(hasCompletedOnboarding: $hasCompletedOnboarding)
-                .tag(2)
+            WelcomePage(currentPage: $currentPage).tag(0)
+            PrivacyPage(currentPage: $currentPage).tag(1)
+            SetupPage(hasCompletedOnboarding: $hasCompletedOnboarding, currentPage: $currentPage).tag(2)
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
-        .background(Color(.systemGroupedBackground))
-    }
-
-    private var pageIndicator: some View {
-        PageDots(currentPage: currentPage)
+        .background(PhosphorTheme.ink950.ignoresSafeArea())
     }
 }
 
@@ -28,32 +19,76 @@ struct OnboardingView: View {
 
 private struct WelcomePage: View {
     @Binding var currentPage: Int
+    @Environment(SubscriptionManager.self) private var subscriptionManager
+    @State private var isRestoring = false
 
     var body: some View {
-        OnboardingPageLayout(
-            icon: "shield.checkered",
-            iconColor: PhosphorTheme.accent,
-            title: "Welcome to Phosphor",
-            subtitle: "System-wide protection against ads, trackers, malware, and unwanted content — built on Apple's newest privacy technology."
-        ) {
-            VStack(spacing: 12) {
-                FeatureRow(icon: "eye.slash", title: "Block Ads", detail: "Remove ads across Safari and every app")
-                FeatureRow(icon: "shield.lefthalf.filled", title: "Stop Trackers", detail: "Prevent cross-site tracking and fingerprinting")
-                FeatureRow(icon: "exclamationmark.shield", title: "Block Malware", detail: "Protection from known malicious domains")
-                FeatureRow(icon: "bolt.shield", title: "Fast & Efficient", detail: "On-device Bloom filter means zero latency for most URLs")
-            }
-        } action: {
-            VStack(spacing: 16) {
-                PageDots(currentPage: currentPage)
-                Button {
-                    withAnimation { currentPage = 1 }
-                } label: {
-                    Text("Next")
-                        .frame(maxWidth: .infinity)
+        OnboardingLayout {
+            VStack(spacing: 0) {
+                PhosphorMark(size: 104)
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 28)
+
+                // The hero line the whole brand hangs on: the promise, then the
+                // thing that makes it unusual, lit.
+                VStack(spacing: 0) {
+                    Text("Blocks ads everywhere.")
+                    Text("Sees nothing.").foregroundStyle(PhosphorTheme.phosphor)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(PhosphorTheme.accent)
-                .controlSize(.large)
+                .font(.system(size: 38, weight: .bold))
+                .kerning(-1.4)
+                .foregroundStyle(PhosphorTheme.ink50)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.bottom, 16)
+
+                Text("System-wide filtering for iOS 26 that keeps the URLs you visit encrypted — even from us.")
+                    .font(.system(size: 17))
+                    .foregroundStyle(PhosphorTheme.ink300)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.bottom, 28)
+
+                VStack(spacing: 8) {
+                    OnboardingFeature(
+                        icon: "iphone",
+                        title: "Every app, not just Safari",
+                        detail: "Ads, trackers, malware, adult content"
+                    )
+                    OnboardingFeature(
+                        icon: "lock.fill",
+                        title: "Encrypted lookups",
+                        detail: "Apple's Private Information Retrieval"
+                    )
+                    OnboardingFeature(
+                        icon: "arrow.up.right",
+                        title: "Zero telemetry, open source",
+                        detail: "MIT-licensed. Read every line."
+                    )
+                }
+            }
+        } footer: {
+            VStack(spacing: 10) {
+                PageDots(currentPage: currentPage)
+
+                Button("Continue") {
+                    withAnimation { currentPage = 1 }
+                }
+                .buttonStyle(PhosphorPrimaryButtonStyle())
+
+                Button {
+                    isRestoring = true
+                    Task {
+                        await subscriptionManager.restorePurchases()
+                        isRestoring = false
+                    }
+                } label: {
+                    Text(isRestoring ? "Restoring…" : "Restore purchase")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundStyle(PhosphorTheme.ink400)
+                        .frame(height: 44)
+                }
+                .disabled(isRestoring)
             }
         }
     }
@@ -65,172 +100,202 @@ private struct PrivacyPage: View {
     @Binding var currentPage: Int
 
     var body: some View {
-        OnboardingPageLayout(
-            icon: "lock.shield",
-            iconColor: .blue,
-            title: "Privacy by Design",
-            subtitle: "Phosphor uses Apple's Private Information Retrieval (PIR) with homomorphic encryption. Here's what that means for you:"
-        ) {
-            VStack(spacing: 16) {
-                PrivacyCard(
-                    icon: "eye.slash.circle.fill",
-                    title: "We Never See Your URLs",
-                    detail: "The system checks URLs locally with a Bloom filter. For potential matches, encrypted queries go through Apple's relay — we can't see what you're browsing."
-                )
-                PrivacyCard(
-                    icon: "server.rack",
-                    title: "Zero Telemetry",
-                    detail: "No analytics SDKs. No crash reporters that phone home. Your data stays on your device."
-                )
-                PrivacyCard(
-                    icon: "network.badge.shield.half.filled",
-                    title: "Apple's OHTTP Relay",
-                    detail: "Even our server can't see your IP address. Apple's Oblivious HTTP relay adds a layer of network anonymity."
-                )
-            }
-        } action: {
-            VStack(spacing: 16) {
-                PageDots(currentPage: currentPage)
-                Button {
-                    withAnimation { currentPage = 2 }
-                } label: {
-                    Text("Next")
-                        .frame(maxWidth: .infinity)
+        OnboardingLayout {
+            VStack(alignment: .leading, spacing: 0) {
+                OnboardingStepHeader(step: "Step 2 of 3") { withAnimation { currentPage = 0 } }
+
+                Text("Nobody sees both.")
+                    .font(.system(size: 34, weight: .bold))
+                    .kerning(-1.2)
+                    .foregroundStyle(PhosphorTheme.ink50)
+                    .padding(.bottom, 14)
+
+                Text("Each party in the chain holds one half of the picture and cannot get the other. This is arrangement, not policy.")
+                    .font(.system(size: 17))
+                    .foregroundStyle(PhosphorTheme.ink300)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.bottom, 18)
+
+                VStack(spacing: 10) {
+                    ActorCard(
+                        title: "Your device",
+                        sees: "The URL, the Bloom filter, the decryption key",
+                        never: "Sends anything home. There is no telemetry to send."
+                    )
+                    ActorCard(
+                        title: "Apple's relay",
+                        sees: "Your IP address and an opaque encrypted blob",
+                        never: "What is inside the query — Oblivious HTTP strips it of meaning."
+                    )
+                    ActorCard(
+                        title: "Our PIR server",
+                        sees: "A homomorphically encrypted query it computes on blind",
+                        never: "Your IP, the URL, or the answer."
+                    )
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(PhosphorTheme.accent)
-                .controlSize(.large)
+            }
+        } footer: {
+            VStack(spacing: 10) {
+                PageDots(currentPage: currentPage)
+                Button("Continue") {
+                    withAnimation { currentPage = 2 }
+                }
+                .buttonStyle(PhosphorPrimaryButtonStyle())
             }
         }
     }
 }
 
-// MARK: - Supporting Views
+// MARK: - Shared layout
 
-private struct OnboardingPageLayout<Content: View, Action: View>: View {
-    let icon: String
-    let iconColor: Color
-    let title: String
-    let subtitle: String
-    @ViewBuilder let content: Content
-    @ViewBuilder let action: Action
+/// Scrolling content over the warm-black page, with a footer pinned under it.
+struct OnboardingLayout<Content: View, Footer: View>: View {
+    @ViewBuilder var content: Content
+    @ViewBuilder var footer: Footer
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 14) {
-                Spacer(minLength: 8)
-
-                Image(systemName: icon)
-                    .font(.system(size: 64))
-                    .foregroundStyle(iconColor)
-                    .accessibilityHidden(true)
-
-                VStack(spacing: 8) {
-                    Text(title)
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .multilineTextAlignment(.center)
-
-                    Text(subtitle)
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .padding(.horizontal)
-
+        VStack(spacing: 0) {
+            ScrollView {
                 content
-                    .padding(.horizontal)
-
-                Spacer(minLength: 8)
-
-                action
                     .padding(.horizontal, 24)
-                    .safeAreaPadding(.bottom, 16)
+                    .padding(.top, 24)
+                    .padding(.bottom, 16)
             }
+            .scrollIndicators(.hidden)
+            .scrollBounceBehavior(.basedOnSize)
+
+            footer
+                .padding(.horizontal, 24)
+                .padding(.top, 8)
+                .padding(.bottom, 12)
         }
-        .scrollBounceBehavior(.basedOnSize)
+        .background(PhosphorTheme.ink950.ignoresSafeArea())
     }
 }
 
-private struct FeatureRow: View {
+/// Back chevron plus the mono step counter.
+struct OnboardingStepHeader: View {
+    let step: String
+    let onBack: () -> Void
+
+    var body: some View {
+        HStack {
+            Button(action: onBack) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(PhosphorTheme.ink50)
+                    .frame(width: 44, height: 44)
+            }
+            .offset(x: -12)
+            .accessibilityLabel("Back")
+
+            Spacer()
+
+            Text(step.uppercased())
+                .font(PhosphorTheme.eyebrow)
+                .tracking(1.0)
+                .foregroundStyle(PhosphorTheme.ink400)
+        }
+        .padding(.bottom, 8)
+    }
+}
+
+private struct OnboardingFeature: View {
     let icon: String
     let title: String
     let detail: String
 
     var body: some View {
         HStack(spacing: 14) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(PhosphorTheme.accent)
-                .frame(width: 32)
-                .accessibilityHidden(true)
+            IconBadge(systemImage: icon)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(PhosphorTheme.ink50)
                 Text(detail)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 13))
+                    .foregroundStyle(PhosphorTheme.ink400)
             }
+            .fixedSize(horizontal: false, vertical: true)
 
-            Spacer()
+            Spacer(minLength: 0)
         }
-        .padding(.vertical, 6)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background {
+            RoundedRectangle(cornerRadius: PhosphorTheme.tileRadius, style: .continuous)
+                .fill(PhosphorTheme.ink900)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: PhosphorTheme.tileRadius, style: .continuous)
+                .strokeBorder(PhosphorTheme.line, lineWidth: 1)
+        }
         .accessibilityElement(children: .combine)
     }
 }
 
-private struct PrivacyCard: View {
-    let icon: String
+private struct ActorCard: View {
     let title: String
-    let detail: String
+    let sees: String
+    let never: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundStyle(.blue)
-                .frame(width: 32)
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 4) {
+        PhosphorCard(padding: 16, radius: PhosphorTheme.tileRadius) {
+            VStack(alignment: .leading, spacing: 12) {
                 Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                Text(detail)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(PhosphorTheme.ink50)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    labelled("SEES", sees, tint: PhosphorTheme.phosphor, body: PhosphorTheme.ink50)
+                    labelled("NEVER", never, tint: PhosphorTheme.ink400, body: PhosphorTheme.ink300)
+                }
             }
         }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
         .accessibilityElement(children: .combine)
+    }
+
+    private func labelled(_ key: String, _ value: String, tint: Color, body: Color) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Text(key)
+                .font(PhosphorTheme.data(11, weight: .regular))
+                .tracking(0.7)
+                .foregroundStyle(tint)
+                .frame(width: 52, alignment: .leading)
+                .padding(.top, 2)
+
+            Text(value)
+                .font(.system(size: 15))
+                .foregroundStyle(body)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 }
 
 // MARK: - Page Dots
 
+/// Progress reads as a lit bar for the current page and quiet dots for the rest.
 struct PageDots: View {
     let currentPage: Int
 
     var body: some View {
-        HStack(spacing: 8) {
-            ForEach(0..<3) { index in
-                Circle()
-                    .fill(index == currentPage ? PhosphorTheme.accent : Color.secondary.opacity(0.3))
-                    .frame(width: 8, height: 8)
-                    .scaleEffect(index == currentPage ? 1.2 : 1.0)
-                    .animation(.easeInOut(duration: 0.2), value: currentPage)
+        HStack(spacing: 6) {
+            ForEach(0..<3, id: \.self) { index in
+                Capsule()
+                    .fill(index == currentPage ? PhosphorTheme.phosphor : PhosphorTheme.ink50.opacity(0.2))
+                    .frame(width: index == currentPage ? 18 : 6, height: 6)
+                    .animation(PhosphorTheme.controlAnimation, value: currentPage)
             }
         }
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel("Page \(currentPage + 1) of 3")
     }
 }
 
 #Preview {
     OnboardingView(hasCompletedOnboarding: .constant(false))
+        .environment(SubscriptionManager())
+        .preferredColorScheme(.dark)
 }

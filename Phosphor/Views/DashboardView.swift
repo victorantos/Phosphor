@@ -1,8 +1,9 @@
-import Charts
 import PhosphorShared
 import SwiftUI
 
 struct DashboardView: View {
+    @Binding var selection: PhosphorTab
+
     @State private var viewModel = DashboardViewModel()
     @State private var hasAppeared = false
 
@@ -13,359 +14,348 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                if viewModel.totalBlocks == 0 {
-                    emptyState
-                } else {
-                    statsContent
+                VStack(spacing: 12) {
+                    header
+
+                    if viewModel.totalBlocks == 0 {
+                        emptyState
+                    } else {
+                        statsContent
+                    }
                 }
+                .padding(.horizontal, 18)
+                .padding(.bottom, 24)
             }
-            .safeAreaPadding(.bottom, 20)
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("Dashboard")
+            .scrollIndicators(.hidden)
+            .phosphorPage()
+            .toolbar(.hidden, for: .navigationBar)
             .refreshable { viewModel.load() }
             .task { await viewModel.observeFilterStatus() }
             .onAppear {
                 viewModel.load()
-                withAnimation(PhosphorTheme.dataAnimation) {
-                    hasAppeared = true
-                }
+                withAnimation(PhosphorTheme.dataAnimation) { hasAppeared = true }
             }
         }
     }
 
-    // MARK: - Empty State
+    // MARK: - Header
 
-    private var emptyState: some View {
-        VStack(spacing: 20) {
-            Image(systemName: isFilterRunning ? "shield.checkered" : "shield.slash")
-                .font(.system(size: 72))
-                .foregroundStyle(isFilterRunning ? PhosphorTheme.accent : .secondary)
-                .padding(.top, 8)
-                .accessibilityHidden(true)
-
-            VStack(spacing: 10) {
-                Text(isFilterRunning ? "Filtering Active" : "Filtering Not Active")
-                    .font(.title)
-                    .fontWeight(.bold)
-
-                Text(isFilterRunning
-                    ? "Block stats will appear here as URLs are filtered."
-                    : "URL filtering is not running. Enable it to block ads, trackers, and malware across all apps.")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(.horizontal, 24)
-
-            // Filter status badge
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(statusColor)
-                    .frame(width: 10, height: 10)
-                Text(viewModel.filterStatus)
-                    .font(.body)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .background(.regularMaterial, in: Capsule())
-
-            if !isFilterRunning {
-                Button {
-                    UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
-                } label: {
-                    Label("Set Up Filtering", systemImage: "slider.horizontal.3")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(PhosphorTheme.accent)
-                .controlSize(.large)
-                .padding(.horizontal, 24)
-            }
-
-            // Summary cards
-            VStack(spacing: 12) {
-                statusCard
-
-                HStack(spacing: 12) {
-                    summaryCard(
-                        icon: "shield.checkered",
-                        title: "Categories",
-                        value: "\(viewModel.enabledListCount)"
-                    )
-                    summaryCard(
-                        icon: "doc.text",
-                        title: "Total Rules",
-                        value: viewModel.totalRuleCount.formatted()
-                    )
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
+    private var header: some View {
+        HStack {
+            PhosphorWordmark(size: 22)
+            Spacer()
+            statusPill
         }
-        .containerRelativeFrame(.vertical) { height, _ in
-            max(height, 500)
+        .padding(.top, 4)
+        .padding(.bottom, 4)
+    }
+
+    private var statusPill: some View {
+        HStack(spacing: 8) {
+            PulseDot(size: 8, isLive: isFilterRunning, color: statusColor)
+            Text(isFilterRunning ? "Active" : viewModel.filterStatus)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(PhosphorTheme.ink50)
         }
-        .frame(maxWidth: .infinity)
+        .padding(.leading, 11)
+        .padding(.trailing, 12)
+        .frame(height: 34)
+        .background(Capsule().fill(statusColor.opacity(0.08)))
+        .overlay(Capsule().strokeBorder(statusColor.opacity(0.25), lineWidth: 1))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Filter status: \(isFilterRunning ? "active" : viewModel.filterStatus)")
     }
 
     private var statusColor: Color {
         switch viewModel.filterStatus {
-        case "Running": .green
-        case "Starting": .yellow
-        case "Stopped": .orange
-        default: .red
+        case "Running": PhosphorTheme.phosphor
+        case "Starting", "Stopping", "Stopped": PhosphorTheme.signalAmber
+        default: PhosphorTheme.signalRed
         }
     }
 
-    // MARK: - Stats Content
+    // MARK: - Stats
 
     private var statsContent: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 12) {
             heroCard
-            periodCards
-            categoryChart
-            trendChart
-            statusCard
-                .padding(.horizontal)
+            periodTiles
+            categoryCard
+            trendCard
+            activeListsRow
         }
-        .padding(.horizontal)
-        .padding(.vertical, 8)
         .opacity(hasAppeared ? 1 : 0)
         .offset(y: hasAppeared ? 0 : 12)
     }
 
-    // MARK: - Hero Card
-
     private var heroCard: some View {
-        VStack(spacing: 8) {
-            Text("Blocked Today")
-                .font(.headline)
-                .foregroundStyle(.secondary)
+        PhosphorCard(padding: 24, radius: 22, lit: true) {
+            VStack(spacing: 8) {
+                Text("Blocked today")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(PhosphorTheme.ink400)
 
-            Text(viewModel.todayBlocks.formatted())
-                .font(.system(size: 72, weight: .bold, design: .rounded))
-                .foregroundStyle(PhosphorTheme.accent)
-                .contentTransition(.numericText())
-                .animation(PhosphorTheme.dataAnimation, value: viewModel.todayBlocks)
+                Text(viewModel.todayBlocks.formatted())
+                    .font(PhosphorTheme.data(62))
+                    .kerning(-3)
+                    .foregroundStyle(PhosphorTheme.phosphor)
+                    .shadow(color: PhosphorTheme.phosphor.opacity(0.45), radius: 22)
+                    .contentTransition(.numericText())
+                    .animation(PhosphorTheme.dataAnimation, value: viewModel.todayBlocks)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
 
-            Text("threats stopped")
-                .font(.subheadline)
-                .foregroundStyle(.tertiary)
+                Text("threats stopped")
+                    .font(.system(size: 14))
+                    .foregroundStyle(PhosphorTheme.ink400)
+            }
+            .frame(maxWidth: .infinity)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 32)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: PhosphorTheme.cardRadius))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(viewModel.todayBlocks) threats blocked today")
     }
 
-    // MARK: - Period Cards
-
-    private var periodCards: some View {
-        HStack(spacing: 12) {
-            PeriodCard(title: "This Week", count: viewModel.weekBlocks, icon: "calendar")
-            PeriodCard(title: "This Month", count: viewModel.monthBlocks, icon: "calendar.badge.clock")
-            PeriodCard(title: "All Time", count: viewModel.totalBlocks, icon: "infinity")
+    private var periodTiles: some View {
+        HStack(spacing: 10) {
+            PeriodTile(title: "This week", count: viewModel.weekBlocks)
+            PeriodTile(title: "This month", count: viewModel.monthBlocks)
+            PeriodTile(title: "All time", count: viewModel.totalBlocks)
         }
     }
 
-    // MARK: - Category Donut Chart
+    // MARK: - By category
 
-    private var categoryChart: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("By Category")
-                .font(.headline)
+    private var categoryCard: some View {
+        PhosphorCard(radius: 18) {
+            VStack(alignment: .leading, spacing: 12) {
+                cardHead("By category", trailing: "today")
 
-            if viewModel.categoryBreakdown.isEmpty {
-                Text("No data yet")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, minHeight: 120)
-            } else {
-                HStack(spacing: 24) {
-                    Chart(viewModel.categoryBreakdown) { point in
-                        SectorMark(
-                            angle: .value("Count", point.count),
-                            innerRadius: .ratio(0.6),
-                            angularInset: 1.5
-                        )
-                        .foregroundStyle(colorForCategory(point.category))
-                        .cornerRadius(4)
-                        .accessibilityLabel("\(point.category.displayName): \(point.count) blocks")
-                    }
-                    .frame(height: 160)
-                    .chartLegend(.hidden)
+                if viewModel.categoryBreakdown.isEmpty {
+                    Text("No data yet")
+                        .font(.system(size: 14))
+                        .foregroundStyle(PhosphorTheme.ink400)
+                        .frame(maxWidth: .infinity, minHeight: 60)
+                } else {
+                    let ranked = viewModel.categoryBreakdown.sorted { $0.count > $1.count }
+                    let peak = max(ranked.first?.count ?? 1, 1)
 
-                    VStack(alignment: .leading, spacing: 12) {
-                        ForEach(viewModel.categoryBreakdown) { point in
-                            HStack(spacing: 8) {
-                                Circle()
-                                    .fill(colorForCategory(point.category))
-                                    .frame(width: 12, height: 12)
-                                    .accessibilityHidden(true)
-                                Text(point.category.displayName)
-                                    .font(.body)
-                                Spacer()
-                                Text(point.count.formatted())
-                                    .font(.body)
-                                    .fontWeight(.semibold)
-                                    .foregroundStyle(.secondary)
-                            }
+                    VStack(spacing: 9) {
+                        ForEach(Array(ranked.enumerated()), id: \.element.id) { index, point in
+                            categoryRow(point, peak: peak, rank: index)
                         }
                     }
                 }
             }
         }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: PhosphorTheme.cardRadius))
     }
 
-    // MARK: - Trend Line Chart
+    private func categoryRow(_ point: DashboardViewModel.CategoryDataPoint, peak: Int, rank: Int) -> some View {
+        // Rank is carried by opacity alone — there is no second accent colour.
+        let emphasis = [1.0, 0.75, 0.5, 0.35][min(rank, 3)]
 
-    private var trendChart: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("14-Day Trend")
-                .font(.headline)
+        return HStack(spacing: 10) {
+            Text(point.category.displayName)
+                .font(.system(size: 13))
+                .foregroundStyle(PhosphorTheme.ink50)
+                .frame(width: 76, alignment: .leading)
+                .lineLimit(1)
 
-            let trend = viewModel.dailyTrend(days: 14)
-            if trend.allSatisfy({ $0.count == 0 }) {
-                Text("No data yet")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, minHeight: 120)
-            } else {
-                Chart(trend) { point in
-                    AreaMark(
-                        x: .value("Date", point.date, unit: .day),
-                        y: .value("Blocks", point.count)
-                    )
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [PhosphorTheme.accent.opacity(0.3), PhosphorTheme.accent.opacity(0.05)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .interpolationMethod(.catmullRom)
+            PhosphorBar(fraction: Double(point.count) / Double(peak), emphasis: emphasis)
 
-                    LineMark(
-                        x: .value("Date", point.date, unit: .day),
-                        y: .value("Blocks", point.count)
-                    )
-                    .foregroundStyle(PhosphorTheme.accent)
-                    .interpolationMethod(.catmullRom)
-                    .lineStyle(StrokeStyle(lineWidth: 2))
-                }
-                .frame(height: 200)
-                .chartXAxis {
-                    AxisMarks(values: .stride(by: .day, count: 3)) { _ in
-                        AxisGridLine()
-                        AxisValueLabel(format: .dateTime.month(.abbreviated).day())
-                    }
-                }
-                .chartYAxis {
-                    AxisMarks(position: .leading) { _ in
-                        AxisGridLine()
-                        AxisValueLabel()
-                    }
-                }
-            }
+            Text(point.count.formatted())
+                .font(PhosphorTheme.data(12, weight: .regular))
+                .foregroundStyle(PhosphorTheme.ink400)
+                .frame(width: 48, alignment: .trailing)
         }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: PhosphorTheme.cardRadius))
-    }
-
-    // MARK: - Cards
-
-    private var statusCard: some View {
-        HStack(spacing: 14) {
-            Image(systemName: "list.bullet.rectangle.fill")
-                .foregroundStyle(PhosphorTheme.accent)
-                .font(.title2)
-                .accessibilityHidden(true)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text("\(viewModel.enabledListCount) active list\(viewModel.enabledListCount == 1 ? "" : "s")")
-                    .font(.body)
-                    .fontWeight(.semibold)
-                Text("\(viewModel.totalRuleCount.formatted()) rules loaded")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-
-            Spacer()
-        }
-        .padding()
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
         .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(point.category.displayName): \(point.count) blocks")
     }
 
-    private func summaryCard(icon: String, title: String, value: String) -> some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(PhosphorTheme.accent)
-            Text(value)
-                .font(.title2)
-                .fontWeight(.bold)
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+    // MARK: - 14-day trend
+
+    private var trendCard: some View {
+        let trend = viewModel.dailyTrend(days: 14)
+        let peak = max(trend.map(\.count).max() ?? 0, 1)
+
+        return PhosphorCard(radius: 18) {
+            VStack(alignment: .leading, spacing: 14) {
+                cardHead("14-day trend", trailing: trendRange(trend))
+
+                if trend.allSatisfy({ $0.count == 0 }) {
+                    Text("No data yet")
+                        .font(.system(size: 14))
+                        .foregroundStyle(PhosphorTheme.ink400)
+                        .frame(maxWidth: .infinity, minHeight: 56)
+                } else {
+                    HStack(alignment: .bottom, spacing: 5) {
+                        ForEach(Array(trend.enumerated()), id: \.element.id) { index, point in
+                            // Opacity ramps toward today, so the eye lands on the
+                            // most recent bar without a second hue.
+                            let fade = 0.35 + 0.65 * (Double(index) / Double(max(trend.count - 1, 1)))
+
+                            UnevenRoundedRectangle(
+                                topLeadingRadius: 3, bottomLeadingRadius: 1,
+                                bottomTrailingRadius: 1, topTrailingRadius: 3,
+                                style: .continuous
+                            )
+                            .fill(PhosphorTheme.phosphor.opacity(fade))
+                            .frame(height: max(2, 56 * Double(point.count) / Double(peak)))
+                            .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .frame(height: 56, alignment: .bottom)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("14-day trend, peaking at \(peak) blocks in a day")
+                }
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func trendRange(_ trend: [DashboardViewModel.DailyDataPoint]) -> String {
+        guard let first = trend.first?.date, let last = trend.last?.date else { return "" }
+        let format = Date.FormatStyle.dateTime.month(.abbreviated).day()
+        return "\(first.formatted(format)) – \(last.formatted(format))"
+    }
+
+    // MARK: - Active lists
+
+    private var activeListsRow: some View {
+        Button {
+            selection = .lists
+        } label: {
+            HStack(spacing: 14) {
+                Image(systemName: "list.bullet.rectangle.fill")
+                    .font(.system(size: 20))
+                    .foregroundStyle(PhosphorTheme.phosphor)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(viewModel.enabledListCount) active list\(viewModel.enabledListCount == 1 ? "" : "s")")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(PhosphorTheme.ink50)
+                    Text("\(viewModel.totalRuleCount.formatted()) rules loaded")
+                        .font(PhosphorTheme.data(12, weight: .regular))
+                        .foregroundStyle(PhosphorTheme.ink400)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(PhosphorTheme.ink400)
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 16)
+            .background {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(PhosphorTheme.ink900)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(PhosphorTheme.line, lineWidth: 1)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Opens the Lists tab")
+    }
+
+    // MARK: - Empty state
+
+    private var emptyState: some View {
+        VStack(spacing: 16) {
+            PhosphorCard(padding: 28, radius: 22, lit: isFilterRunning) {
+                VStack(spacing: 16) {
+                    PhosphorMark(size: 72)
+
+                    VStack(spacing: 8) {
+                        Text(isFilterRunning ? "Filtering active" : "Filtering not active")
+                            .font(.system(size: 26, weight: .bold))
+                            .kerning(-0.8)
+                            .foregroundStyle(PhosphorTheme.ink50)
+                            .multilineTextAlignment(.center)
+
+                        Text(isFilterRunning
+                             ? "Block counts appear here as URLs are filtered. Nothing is sent anywhere to produce them."
+                             : "URL filtering is not running. Turn it on to block ads, trackers and malware across every app.")
+                            .font(.system(size: 15))
+                            .foregroundStyle(PhosphorTheme.ink300)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    if !isFilterRunning {
+                        Button("Set up filtering") {
+                            UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+                        }
+                        .buttonStyle(PhosphorPrimaryButtonStyle())
+                        .padding(.top, 4)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+
+            HStack(spacing: 10) {
+                PeriodTile(title: "Active lists", count: viewModel.enabledListCount)
+                PeriodTile(title: "Rules loaded", count: viewModel.totalRuleCount)
+            }
+        }
+        .padding(.top, 8)
     }
 
     // MARK: - Helpers
 
-    private func colorForCategory(_ category: FilterCategory) -> Color {
-        switch category {
-        case .ads: PhosphorTheme.accent
-        case .trackers: .blue
-        case .malware: .red
-        case .adultContent: .purple
+    private func cardHead(_ title: String, trailing: String) -> some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(title)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(PhosphorTheme.ink50)
+            Spacer()
+            Text(trailing)
+                .font(PhosphorTheme.data(12, weight: .regular))
+                .foregroundStyle(PhosphorTheme.ink400)
         }
     }
 }
 
-// MARK: - Period Card
+// MARK: - Period tile
 
-private struct PeriodCard: View {
+private struct PeriodTile: View {
     let title: String
     let count: Int
-    let icon: String
 
     var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .accessibilityHidden(true)
+        VStack(spacing: 4) {
             Text(count.formatted())
-                .font(.title)
-                .fontWeight(.bold)
-                .foregroundStyle(PhosphorTheme.accent)
+                .font(PhosphorTheme.data(19))
+                .kerning(-0.6)
+                .foregroundStyle(PhosphorTheme.phosphor)
                 .contentTransition(.numericText())
                 .animation(PhosphorTheme.dataAnimation, value: count)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+
             Text(title)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 12))
+                .foregroundStyle(PhosphorTheme.ink400)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+        .padding(.vertical, 13)
+        .padding(.horizontal, 10)
+        .background {
+            RoundedRectangle(cornerRadius: PhosphorTheme.tileRadius, style: .continuous)
+                .fill(PhosphorTheme.ink900)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: PhosphorTheme.tileRadius, style: .continuous)
+                .strokeBorder(PhosphorTheme.line, lineWidth: 1)
+        }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(count) blocks \(title.lowercased())")
+        .accessibilityLabel("\(count) \(title.lowercased())")
     }
 }
 
-#Preview("Empty") {
-    DashboardView()
+#Preview {
+    DashboardView(selection: .constant(.dashboard))
+        .preferredColorScheme(.dark)
 }
