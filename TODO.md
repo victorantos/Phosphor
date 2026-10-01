@@ -190,6 +190,17 @@ it is the default), monthly $1.99, 7-day free trial on both, no lifetime plan.
       Connect price and offer changes (debug build on the iPhone 11 logged "Loaded 1
       products: com.nestclaw.phosphor.monthly $29.99"). Apple-side propagation; wait and
       recheck. Build 5 shows whichever plans load and a retry state when none do.
+- [ ] TestFlight build 5 on the iPhone 15 (2026-10-01): after a phone restart (iOS did
+      not find the extension after the TestFlight install until then) the filter fails
+      because iOS fetches the token issuer through Apple:
+      `gateway.icloud.com/pat-issuer-directory?issuer=pir.phosphor.online` returns 404.
+      Apple's relay does not know the server yet (onboarding "Queued"). Likely cause:
+      the Privacy Pass test token registered with Apple (in the Identity & Trust
+      configuration) is the pre-rotation token, which the server rejected (401) since
+      the 2026-09-29 rotation. `build/server-scripts/pir-add-apple-test-token.sh` adds it
+      back next to the app token; run 2026-10-01, both tokens now return 200. Next: Apple
+      re-runs onboarding validation (message drafted for the user to send).
+- [ ] Setup screen still says "~99.9% never leave the phone"; reword like the listing.
 - [ ] Resubmit with a note for App Review that
       Safari has to be reopened after a list is changed. Not needed after first setup:
       on a clean install Safari blocked at once without being reopened (2026-10-01).
