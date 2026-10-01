@@ -20,6 +20,9 @@ struct PaywallView: View {
             SubscriptionStoreView(productIDs: productIDs) {
                 marketingContent
             }
+            // Both plans sit in the bottom bar next to the purchase button, so they are
+            // visible without scrolling past the marketing copy and terms.
+            .subscriptionStoreControlStyle(.compactPicker, placement: .bottomBar)
             .subscriptionStorePickerItemBackground(PhosphorTheme.ink900)
             .storeButton(.visible, for: .restorePurchases)
             .storeButton(.visible, for: .policies)
@@ -83,8 +86,8 @@ struct PaywallView: View {
 
     private var marketingContent: some View {
         VStack(spacing: 0) {
-            PhosphorMark(size: 64)
-                .padding(.bottom, 16)
+            PhosphorMark(size: 48)
+                .padding(.bottom, 12)
 
             Text("PHOSPHOR PREMIUM")
                 .font(PhosphorTheme.eyebrow)
@@ -93,13 +96,13 @@ struct PaywallView: View {
                 .padding(.bottom, 12)
 
             Text("Turn filtering on. Keep your history yours.")
-                .font(.system(size: 30, weight: .bold))
-                .kerning(-1.1)
+                .font(.system(size: 26, weight: .bold))
+                .kerning(-0.9)
                 .foregroundStyle(PhosphorTheme.ink50)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, 8)
-                .padding(.bottom, 22)
+                .padding(.bottom, 18)
 
             VStack(alignment: .leading, spacing: 10) {
                 FeatureItem(text: "Block ads & trackers across all apps")
@@ -119,6 +122,14 @@ struct PaywallView: View {
 
     // MARK: - Subscription Terms & Legal Links
 
+    private var legalLinks: AttributedString {
+        var terms = AttributedString("Terms of Use (EULA)")
+        terms.link = termsOfServiceURL
+        var privacy = AttributedString("Privacy Policy")
+        privacy.link = privacyPolicyURL
+        return terms + AttributedString(" · ") + privacy
+    }
+
     /// Prices come from the App Store so they match the user's storefront.
     private var termsText: String {
         var plans = "Choose Annual or Monthly."
@@ -136,13 +147,11 @@ struct PaywallView: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
-            HStack(spacing: 16) {
-                Link("Terms of Use (EULA)", destination: termsOfServiceURL)
-                Text("·").foregroundStyle(PhosphorTheme.ink400)
-                Link("Privacy Policy", destination: privacyPolicyURL)
-            }
-            .font(.system(size: 12, weight: .medium))
-            .tint(PhosphorTheme.phosphor)
+            // Inline links: a Link here would be drawn as a large button by the store view.
+            Text(legalLinks)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(PhosphorTheme.ink400)
+                .tint(PhosphorTheme.phosphor)
         }
         .padding(.top, 4)
     }
