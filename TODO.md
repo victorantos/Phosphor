@@ -166,20 +166,26 @@ it is the default), monthly $1.99, 7-day free trial on both, no lifetime plan.
 
 ## App Store
 
-- [ ] Paid Apps Agreement: was "Processing" after the bank account was added.
-- [ ] Compliance Screening form in App Store Connect.
+- [x] Paid Apps Agreement Active (Sep 20, 2026 - Mar 20, 2027); bank account, tax
+      forms and Digital Services Act compliance Active (checked 2026-10-01).
 - [ ] Both subscriptions are "Developer Rejected" and have to be added to the next
       submission.
-- [ ] Change the prices: yearly (`com.nestclaw.phosphor.yearly`) $12.99, monthly
-      (`com.nestclaw.phosphor.monthly`) $1.99, each with a 1-week free trial as the
-      introductory offer. Check the App Store description and promotional text for old
-      prices.
-- [ ] App Review note: filtering requires a subscription; start the free trial with
-      the sandbox account, then allow the filter when iOS asks.
+- [x] Prices set 2026-10-01 (Subscription Pricing page > Starting Price > Edit Price;
+      the "+" menu only has offers): Yearly $12.99 / €12.99 (25 euro countries) /
+      CHF 14.90 / £14.99, Monthly $1.99 / €1.99 / CHF 2.90 / £2.99, others converted.
+      CHF has no .99 price points. A 1-week free introductory offer was created for both
+      (there was none before). Description, promotional text and review notes updated:
+      new prices, no "first app" or dashboard claims, trial steps in the notes.
+- [x] App Review note updated (trial steps, starting wait, subscription behaviour).
 - [ ] Apple's relay onboarding for NE URL Filter configuration
-      `b2f98894-6a27-4a1d-b050-79e23fd81022` was "pending" on 2026-09-29. App Store and
-      TestFlight builds reach the PIR server only through the relay.
-- [ ] Bump the build number, archive, and resubmit with a note for App Review that
+      `b2f98894-6a27-4a1d-b050-79e23fd81022`: Status Approved, Onboarding Status
+      "Queued" on 2026-10-01 (CloudKit Console > Identity & Trust). App Store and
+      TestFlight builds reach the PIR server only through the relay, so do not submit
+      until it reads complete or a TestFlight build shows the filter running.
+- [x] Build 1.0 (4) archived and uploaded 2026-10-01 (FilterProbe and the debug
+      override are compiled out of release builds; checked in the archive). Next:
+      TestFlight on a phone to see whether the filter starts through the relay.
+- [ ] Resubmit with a note for App Review that
       Safari has to be reopened after a list is changed. Not needed after first setup:
       on a clean install Safari blocked at once without being reopened (2026-10-01).
 

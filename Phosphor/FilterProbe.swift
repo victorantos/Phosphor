@@ -5,11 +5,12 @@ import os
 /// Asks the system URL filter for its verdict on a list of URLs and logs each one.
 ///
 /// A diagnostic, run only when the app is launched with `PHOSPHOR_PROBE_URLS` set to a
-/// comma-separated list of URLs.
+/// comma-separated list of URLs. Compiled out of release builds.
 enum FilterProbe {
     private static let logger = Logger(subsystem: "com.nestclaw.phosphor", category: "FilterProbe")
 
     static func runIfRequested() async {
+        #if DEBUG
         guard let list = ProcessInfo.processInfo.environment["PHOSPHOR_PROBE_URLS"] else { return }
         if #available(iOS 27, *) {
             let manager = NEURLFilterManager.shared
@@ -22,5 +23,6 @@ enum FilterProbe {
             logger.info("PROBE \(url.absoluteString, privacy: .public) -> \(String(describing: verdict), privacy: .public)")
         }
         logger.info("PROBE done")
+        #endif
     }
 }
